@@ -11,12 +11,6 @@ import { HabitGrid } from './components/HabitGrid'
 import { ProgressTable } from './components/ProgressTable'
 import { SettingsDrawer } from './components/SettingsDrawer'
 import { useMidnightBackup } from './hooks/useMidnightBackup'
-import { useGoogleSync } from './hooks/useGoogleSync'
-import { ConflictResolutionModal } from './components/ConflictResolutionModal'
-import { GoogleTaskIntroModal } from './components/GoogleTaskIntroModal'
-import { GoogleTaskReviewModal } from './components/GoogleTaskReviewModal'
-import { SyncDecisionModal } from './components/SyncDecisionModal'
-import { SyncNotificationCenter } from './components/SyncNotificationCenter'
 import { applyTheme } from './utils/theme'
 import { LayoutDashboard, Calendar, BarChart3, Trophy, Heart } from 'lucide-react'
 
@@ -27,7 +21,6 @@ function App() {
   const accentColor = useHabitStore((state) => state.settings.accentColor)
 
   useMidnightBackup()
-  useGoogleSync()
 
   useEffect(() => {
     applyTheme(darkMode, accentColor)
@@ -65,7 +58,7 @@ function App() {
             </span>
             <span className="hidden sm:inline text-ink3 dark:text-zinc-600">·</span>
             <p className="text-[9.5px] text-ink2 dark:text-zinc-500 font-medium">
-              Offline-first · Optional Google Tasks sync
+              Offline-first habit tracking
             </p>
           </footer>
         </div>
@@ -131,11 +124,6 @@ function App() {
       </nav>
 
       <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      <ConflictResolutionModal />
-      <GoogleTaskIntroModal />
-      <GoogleTaskReviewModal />
-      <SyncDecisionModal />
-      <SyncNotificationCenter />
     </div>
   )
 }

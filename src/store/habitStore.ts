@@ -6,7 +6,6 @@ import {
   saveBackup,
   type BackupSource,
 } from '../utils/backupStorage'
-import { isToday, normalizeHabit, touchHabit } from '../utils/habitSync'
 
 export interface Habit {
   id: string
@@ -19,8 +18,6 @@ export interface Habit {
   active: boolean
   completed: boolean
   dueDate: string | null
-  googleTaskId: string | null
-  syncEnabled: boolean
 }
 
 export interface CompletionLogs {
@@ -57,7 +54,7 @@ interface HabitState {
 
   setDate: (year: number, month: number) => void
   toggleDay: (year: number, month: number, habitId: string, day: number) => void
-  addHabit: (name: string, iconEmoji: string, color: string, goal: number, syncEnabled?: boolean) => void
+  addHabit: (name: string, iconEmoji: string, color: string, goal: number) => void
   updateHabit: (id: string, updates: Partial<Habit>) => void
   deleteHabit: (id: string) => void
   reorderHabits: (startIndex: number, endIndex: number) => void
@@ -68,22 +65,34 @@ interface HabitState {
   saveProgressBackup: (source: BackupSource) => void
   restoreProgressBackup: () => boolean
   getLatestBackupLabel: () => string | null
-  mergeHabitsFromSync: (habits: Habit[]) => void
-  patchHabitSilent: (id: string, updates: Partial<Habit>) => void
-  setHabitSyncEnabled: (id: string, enabled: boolean) => void
   setTodayCompletion: (habitId: string, completed: boolean) => void
 }
 
 const nowIso = () => new Date().toISOString()
 
+function normalizeHabit(raw: Partial<Habit> & { id: string; name: string }): Habit {
+  return {
+    id: raw.id,
+    name: raw.name,
+    color: raw.color ?? '#A8D8EA',
+    goal: raw.goal ?? 21,
+    iconEmoji: raw.iconEmoji ?? '⭐',
+    createdAt: raw.createdAt ?? nowIso(),
+    updatedAt: raw.updatedAt ?? nowIso(),
+    active: raw.active ?? true,
+    completed: raw.completed ?? false,
+    dueDate: raw.dueDate ?? null,
+  }
+}
+
 const DEFAULT_HABITS: Habit[] = [
-  { id: '1', name: 'Morning Meditation', color: '#A8D8EA', goal: 25, iconEmoji: '🧘', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
-  { id: '2', name: 'Read 10 Pages', color: '#C0A8E8', goal: 20, iconEmoji: '📚', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
-  { id: '3', name: 'Workout Routine', color: '#F4A0B8', goal: 18, iconEmoji: '🏋️', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
-  { id: '4', name: '8 Glasses of Water', color: '#8ED4B4', goal: 30, iconEmoji: '💧', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
-  { id: '5', name: 'Journal Thoughts', color: '#F5D87A', goal: 15, iconEmoji: '✍️', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
-  { id: '6', name: 'Healthy Eating', color: '#F4A88A', goal: 28, iconEmoji: '🍏', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
-  { id: '7', name: '8 Hours Sleep', color: '#8ED4CE', goal: 22, iconEmoji: '😴', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null, googleTaskId: null, syncEnabled: false },
+  { id: '1', name: 'Morning Meditation', color: '#A8D8EA', goal: 25, iconEmoji: '🧘', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
+  { id: '2', name: 'Read 10 Pages', color: '#C0A8E8', goal: 20, iconEmoji: '📚', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
+  { id: '3', name: 'Workout Routine', color: '#F4A0B8', goal: 18, iconEmoji: '🏋️', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
+  { id: '4', name: '8 Glasses of Water', color: '#8ED4B4', goal: 30, iconEmoji: '💧', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
+  { id: '5', name: 'Journal Thoughts', color: '#F5D87A', goal: 15, iconEmoji: '✍️', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
+  { id: '6', name: 'Healthy Eating', color: '#F4A88A', goal: 28, iconEmoji: '🍏', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
+  { id: '7', name: '8 Hours Sleep', color: '#8ED4CE', goal: 22, iconEmoji: '😴', createdAt: nowIso(), updatedAt: nowIso(), active: true, completed: false, dueDate: null },
 ]
 
 const generateDemoLogs = (habits: Habit[]): CompletionLogs => {
@@ -134,9 +143,15 @@ function migrateHabit(raw: Partial<Habit> & { id: string; name: string }): Habit
     updatedAt: raw.updatedAt ?? raw.createdAt ?? nowIso(),
     completed: raw.completed ?? false,
     dueDate: raw.dueDate ?? null,
-    googleTaskId: raw.googleTaskId ?? null,
-    syncEnabled: raw.syncEnabled ?? false,
   })
+}
+
+function updateHabitTimestamp(habit: Habit, updates: Partial<Habit>): Habit {
+  return {
+    ...habit,
+    ...updates,
+    updatedAt: nowIso(),
+  }
 }
 
 export const useHabitStore = create<HabitState>()(
@@ -179,19 +194,10 @@ export const useHabitStore = create<HabitState>()(
             const currentVal = !!newLogs[yearStr][monthStr][habitId][dayStr]
             newLogs[yearStr][monthStr][habitId][dayStr] = !currentVal
 
-            let habits = state.habits
-            if (isToday(year, month, day)) {
-              habits = state.habits.map((h) =>
-                h.id === habitId && h.syncEnabled
-                  ? touchHabit(h, { completed: !currentVal })
-                  : h,
-              )
-            }
-
-            return { logs: newLogs, habits }
+            return { logs: newLogs }
           }),
 
-        addHabit: (name, iconEmoji, color, goal, syncEnabled = false) =>
+        addHabit: (name, iconEmoji, color, goal) =>
           set((state) => {
             const createdAt = nowIso()
             const newHabit = normalizeHabit({
@@ -202,7 +208,6 @@ export const useHabitStore = create<HabitState>()(
               goal,
               createdAt,
               updatedAt: createdAt,
-              syncEnabled,
             })
 
             const yearStr = state.selectedYear.toString()
@@ -221,7 +226,7 @@ export const useHabitStore = create<HabitState>()(
         updateHabit: (id, updates) =>
           set((state) => ({
             habits: state.habits.map((h) =>
-              h.id === id ? touchHabit(h, updates) : h,
+              h.id === id ? updateHabitTimestamp(h, updates) : h,
             ),
           })),
 
@@ -246,27 +251,6 @@ export const useHabitStore = create<HabitState>()(
         updateSettings: (updates) =>
           set((state) => ({
             settings: { ...state.settings, ...updates },
-          })),
-
-        mergeHabitsFromSync: (incoming) =>
-          set((state) => {
-            const map = new Map(state.habits.map((h) => [h.id, h]))
-            for (const habit of incoming) {
-              map.set(habit.id, habit)
-            }
-            return { habits: Array.from(map.values()) }
-          }),
-
-        patchHabitSilent: (id, updates) =>
-          set((state) => ({
-            habits: state.habits.map((h) => (h.id === id ? { ...h, ...updates } : h)),
-          })),
-
-        setHabitSyncEnabled: (id, enabled) =>
-          set((state) => ({
-            habits: state.habits.map((h) =>
-              h.id === id ? touchHabit(h, { syncEnabled: enabled }) : h,
-            ),
           })),
 
         setTodayCompletion: (habitId, completed) =>
@@ -384,3 +368,4 @@ export const useHabitStore = create<HabitState>()(
     },
   ),
 )
+

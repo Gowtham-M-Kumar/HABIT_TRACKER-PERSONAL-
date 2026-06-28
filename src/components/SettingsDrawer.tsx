@@ -3,11 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useHabitStore } from '../store/habitStore'
 import type { Habit } from '../store/habitStore'
 import { applyTheme } from '../utils/theme'
-import { ConnectedServicesPanel } from './ConnectedServicesPanel'
-import { useAuthStore } from '../store/authStore'
-import { useSyncStore } from '../store/syncStore'
-import { deleteRemoteHabit } from '../services/syncEngine'
-import { X, Trash2, Plus, ArrowUp, ArrowDown, Moon, Sun, Save, Check, RotateCcw, HardDriveDownload, Cloud } from 'lucide-react'
+import { X, Trash2, Plus, ArrowUp, ArrowDown, Moon, Sun, Save, Check, RotateCcw, HardDriveDownload } from 'lucide-react'
 
 interface SettingsDrawerProps {
   isOpen: boolean
@@ -42,8 +38,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   const saveProgressBackup = useHabitStore((state) => state.saveProgressBackup)
   const restoreProgressBackup = useHabitStore((state) => state.restoreProgressBackup)
   const getLatestBackupLabel = useHabitStore((state) => state.getLatestBackupLabel)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const googleTasksConnected = useSyncStore((s) => s.googleTasksConnected)
 
   // Profile draft states
   const [draftName, setDraftName] = useState(profile.name)
@@ -52,7 +46,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   const [backupLabel, setBackupLabel] = useState<string | null>(getLatestBackupLabel())
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null)
 
-  // Synchronize drafts when store loads/resets
   useEffect(() => {
     if (isOpen) {
       setBackupLabel(getLatestBackupLabel())
@@ -72,7 +65,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   const [editColor, setEditColor] = useState(PALETTE_COLORS[0])
   const [editEmoji, setEditEmoji] = useState(EMOJIS[0])
   const [editDueDate, setEditDueDate] = useState('')
-  const [editSyncEnabled, setEditSyncEnabled] = useState(false)
 
   const handleStartEditHabit = (habit: Habit) => {
     setEditingHabitId(habit.id)
@@ -81,7 +73,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     setEditColor(habit.color)
     setEditEmoji(habit.iconEmoji)
     setEditDueDate(habit.dueDate ?? '')
-    setEditSyncEnabled(habit.syncEnabled)
   }
 
   const handleSaveHabit = (id: string) => {
@@ -91,7 +82,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
       color: editColor,
       iconEmoji: editEmoji,
       dueDate: editDueDate || null,
-      syncEnabled: editSyncEnabled,
     })
     setEditingHabitId(null)
   }
@@ -101,15 +91,13 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   const [newHabitGoal, setNewHabitGoal] = useState(20)
   const [newHabitColor, setNewHabitColor] = useState(PALETTE_COLORS[0])
   const [newHabitEmoji, setNewHabitEmoji] = useState(EMOJIS[0])
-  const [newHabitSync, setNewHabitSync] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
 
   const handleAddHabitSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newHabitName.trim()) return
-    addHabit(newHabitName, newHabitEmoji, newHabitColor, newHabitGoal, newHabitSync)
+    addHabit(newHabitName, newHabitEmoji, newHabitColor, newHabitGoal)
     setNewHabitName('')
-    setNewHabitSync(false)
     setShowAddForm(false)
   }
 
@@ -162,7 +150,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -171,7 +158,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50"
           />
 
-          {/* Sliding Panel */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -229,6 +215,21 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                       className="w-full text-xs font-semibold text-ink dark:text-zinc-200 bg-slate-50 dark:bg-zinc-900 border border-app-border dark:border-zinc-800 px-3 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-brand resize-none"
                     />
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleSavePreferences}
+                    className="w-full text-xs font-bold text-white bg-pink-dark dark:bg-pink-brand hover:opacity-95 py-2 px-4 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    {isPreferencesSaved ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-white" /> Profile Saved!
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-3.5 h-3.5" /> Save Profile
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -281,25 +282,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                         />
                       ))}
                     </div>
-                  </div>
-
-                  {/* Save Button for Profile fields only */}
-                  <div className="pt-2 border-t border-app-border/40 dark:border-zinc-800/40">
-                    <button
-                      type="button"
-                      onClick={handleSavePreferences}
-                      className="w-full text-xs font-bold text-white bg-pink-dark dark:bg-pink-brand hover:opacity-95 py-2 px-4 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                    >
-                      {isPreferencesSaved ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-white" /> Profile Saved!
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-3.5 h-3.5" /> Save Profile
-                        </>
-                      )}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -388,18 +370,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                         </div>
                       </div>
 
-                      {isAuthenticated && googleTasksConnected && (
-                        <label className="flex items-center gap-2 text-[10px] font-semibold text-ink2 dark:text-zinc-400 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={newHabitSync}
-                            onChange={(e) => setNewHabitSync(e.target.checked)}
-                            className="rounded border-app-border"
-                          />
-                          <Cloud className="w-3 h-3" /> Sync with Google Tasks
-                        </label>
-                      )}
-
                       <button
                         type="submit"
                         className="w-full text-xs font-bold text-white bg-pink-dark dark:bg-pink-brand hover:opacity-95 py-2 rounded-lg cursor-pointer transition-opacity"
@@ -434,11 +404,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             <span className="text-[9px] font-mono text-ink3 dark:text-zinc-500">
                               (G: {habit.goal})
                             </span>
-                            {habit.syncEnabled && (
-                              <span className="text-[8px] font-bold uppercase tracking-wider text-teal-dark dark:text-teal-brand flex items-center gap-0.5">
-                                <Cloud className="w-2.5 h-2.5" /> Sync
-                              </span>
-                            )}
                           </div>
 
                           {/* Reorder & Action controls */}
@@ -479,7 +444,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             <button
                               onClick={() => {
                                 if (window.confirm(`Delete "${habit.name}"? All calendar log history will be deleted.`)) {
-                                  void deleteRemoteHabit(habit)
                                   deleteHabit(habit.id)
                                 }
                               }}
@@ -543,26 +507,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                                   </select>
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                  <label className="text-[8px] font-bold text-ink3 dark:text-zinc-500 block mb-0.5">Due Date</label>
-                                  <input
-                                    type="date"
-                                    value={editDueDate}
-                                    onChange={(e) => setEditDueDate(e.target.value)}
-                                    className="w-full text-[11px] font-semibold text-ink dark:text-zinc-200 bg-white dark:bg-zinc-950 border border-app-border dark:border-zinc-800 px-2 py-1 rounded-md focus:outline-none"
-                                  />
-                                </div>
-                                {isAuthenticated && googleTasksConnected && (
-                                  <label className="flex items-end gap-2 pb-1 text-[10px] font-semibold text-ink2 dark:text-zinc-400 cursor-pointer">
-                                    <input
-                                      type="checkbox"
-                                      checked={editSyncEnabled}
-                                      onChange={(e) => setEditSyncEnabled(e.target.checked)}
-                                    />
-                                    Sync with Google Tasks
-                                  </label>
-                                )}
+                              <div>
+                                <label className="text-[8px] font-bold text-ink3 dark:text-zinc-500 block mb-0.5">Due Date</label>
+                                <input
+                                  type="date"
+                                  value={editDueDate}
+                                  onChange={(e) => setEditDueDate(e.target.value)}
+                                  className="w-full text-[11px] font-semibold text-ink dark:text-zinc-200 bg-white dark:bg-zinc-950 border border-app-border dark:border-zinc-800 px-2 py-1 rounded-md focus:outline-none"
+                                />
                               </div>
                               {/* Save Habit button */}
                               <div className="pt-2 flex justify-end">
@@ -582,8 +534,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                   })}
                 </div>
               </div>
-
-              <ConnectedServicesPanel />
 
               {/* Section 4: Data management */}
               <div className="bg-white dark:bg-zinc-950 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow">

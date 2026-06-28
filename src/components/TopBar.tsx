@@ -1,7 +1,6 @@
 import React from 'react'
 import { Settings as SettingsIcon } from 'lucide-react'
 import { useProfileBanner } from '../hooks/useProfileBanner'
-import { GoogleAuthButton } from './GoogleAuthButton'
 
 interface TopBarProps {
   onOpenSettings: () => void
@@ -76,17 +75,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenSettings }) => {
             </div>
           </div>
 
-          {/* Google auth + Settings */}
-          <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-            <GoogleAuthButton onOpenSettings={onOpenSettings} />
-            <button
-              onClick={onOpenSettings}
-              className="p-2.5 rounded-xl border border-app-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink2 dark:text-zinc-300 hover:text-ink hover:bg-slate-50 dark:hover:bg-zinc-700/50 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:border-pink-brand/30 focus:outline-none focus:ring-2 focus:ring-pink-brand/50"
-              aria-label="Open settings"
-            >
-              <SettingsIcon className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Settings button */}
+          <button
+            onClick={onOpenSettings}
+            className="ml-auto p-2.5 rounded-xl border border-app-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink2 dark:text-zinc-300 hover:text-ink hover:bg-slate-50 dark:hover:bg-zinc-700/50 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:border-pink-brand/30 focus:outline-none focus:ring-2 focus:ring-pink-brand/50 flex-shrink-0"
+            aria-label="Open settings"
+          >
+            <SettingsIcon className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Mobile affirmation strip */}

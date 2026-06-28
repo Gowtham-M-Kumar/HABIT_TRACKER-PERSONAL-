@@ -5,14 +5,6 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      },
-    },
-  },
   plugins: [
     react(),
     tailwindcss(),
@@ -22,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: 'Habit Tracker',
         short_name: 'Habits',
-        description: 'A beautiful, satisfying, production-ready habit tracker.',
+        description: 'A beautiful, satisfying, offline-first habit tracker.',
         theme_color: '#FDFCF8',
         background_color: '#FDFCF8',
         display: 'standalone',

@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useHabitStore } from '../store/habitStore'
 import type { Habit } from '../store/habitStore'
 import { applyTheme } from '../utils/theme'
-import { X, Trash2, Plus, ArrowUp, ArrowDown, Moon, Sun, Save, Check, RotateCcw, HardDriveDownload } from 'lucide-react'
+import { X, Trash2, Plus, ArrowUp, ArrowDown, Moon, Sun, Save, Check, RotateCcw, HardDriveDownload, Cloud, CloudOff, LogIn, LogOut, Shield } from 'lucide-react'
+import { useAuthStore } from '../store/authStore'
+import { ChangePasswordModal } from './auth/AuthModal'
 
 interface SettingsDrawerProps {
   isOpen: boolean
@@ -38,6 +40,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   const saveProgressBackup = useHabitStore((state) => state.saveProgressBackup)
   const restoreProgressBackup = useHabitStore((state) => state.restoreProgressBackup)
   const getLatestBackupLabel = useHabitStore((state) => state.getLatestBackupLabel)
+
+  // Auth
+  const { mode, user, signOut, openAuthModal } = useAuthStore()
+  const [isChangePwOpen, setIsChangePwOpen] = useState(false)
 
   // Profile draft states
   const [draftName, setDraftName] = useState(profile.name)
@@ -147,24 +153,25 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   }
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-            className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50"
-          />
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleClose}
+              className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50"
+            />
 
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 26, stiffness: 200 }}
-            className="fixed top-0 right-0 w-full max-w-md h-full bg-cream dark:bg-zinc-900 border-l border-app-border dark:border-zinc-800 z-50 shadow-2xl flex flex-col"
-          >
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 200 }}
+              className="fixed top-0 right-0 w-full max-w-md h-full bg-cream dark:bg-zinc-900 border-l border-app-border dark:border-zinc-800 z-50 shadow-2xl flex flex-col"
+            >
             {/* Header */}
             <div className="p-4 border-b border-app-border dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-900/60">
               <div>
@@ -186,6 +193,54 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar select-none">
+
+              {/* Section 0: Account Status */}
+              <div className="bg-white dark:bg-zinc-950 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-ink3 dark:text-zinc-500 block mb-3">
+                  ☁️ Account & Sync
+                </span>
+                {mode === 'cloud' ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 rounded-lg px-3 py-2">
+                      <Cloud className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Cloud Sync Active</p>
+                        <p className="text-[9px] text-emerald-600/70 dark:text-emerald-500/60 truncate">{user?.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsChangePwOpen(true)}
+                        className="flex-1 flex items-center justify-center gap-1 text-[10px] font-bold text-blue-dark dark:text-blue-brand border border-blue-brand/20 hover:bg-blue-light/30 dark:hover:bg-blue-brand/10 py-2 rounded-lg cursor-pointer transition-colors"
+                      >
+                        <Shield className="w-3 h-3" /> Change Password
+                      </button>
+                      <button
+                        onClick={() => signOut()}
+                        className="flex-1 flex items-center justify-center gap-1 text-[10px] font-bold text-ink3 dark:text-zinc-400 border border-app-border dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 py-2 rounded-lg cursor-pointer transition-colors"
+                      >
+                        <LogOut className="w-3 h-3" /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-800/20 rounded-lg px-3 py-2">
+                      <CloudOff className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400">Guest Mode</p>
+                        <p className="text-[9px] text-amber-600/70 dark:text-amber-500/60">Data stored locally only</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => { openAuthModal('login'); onClose() }}
+                      className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 py-2.5 rounded-lg cursor-pointer transition-all"
+                    >
+                      <LogIn className="w-3 h-3" /> Sign In or Create Account
+                    </button>
+                  </div>
+                )}
+              </div>
               
               {/* Section 1: Profile Details */}
               <div className="bg-white dark:bg-zinc-950 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow">
@@ -619,5 +674,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
         </>
       )}
     </AnimatePresence>
+
+      <ChangePasswordModal isOpen={isChangePwOpen} onClose={() => setIsChangePwOpen(false)} />
+    </>
   )
 }

@@ -12,6 +12,7 @@ import { HabitGrid } from './components/HabitGrid'
 import { ProgressTable } from './components/ProgressTable'
 import { SettingsDrawer } from './components/SettingsDrawer'
 import { useMidnightBackup } from './hooks/useMidnightBackup'
+import { useCloudSync } from './hooks/useCloudSync'
 import { applyTheme } from './utils/theme'
 import { LayoutDashboard, BarChart3, Trophy, Heart } from 'lucide-react'
 
@@ -24,6 +25,7 @@ function App() {
   const accentColor = useHabitStore((state) => state.settings.accentColor)
 
   useMidnightBackup()
+  useCloudSync()
 
   useEffect(() => {
     applyTheme(darkMode, accentColor)

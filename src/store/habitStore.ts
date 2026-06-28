@@ -66,6 +66,13 @@ interface HabitState {
   restoreProgressBackup: () => boolean
   getLatestBackupLabel: () => string | null
   setTodayCompletion: (habitId: string, completed: boolean) => void
+  /** Bulk-load all state from cloud — used by useCloudSync to hydrate from Supabase. */
+  setFullData: (data: {
+    habits: Habit[]
+    logs: CompletionLogs
+    profile?: Partial<Profile>
+    settings?: Partial<Settings>
+  }) => void
 }
 
 const nowIso = () => new Date().toISOString()
@@ -201,7 +208,7 @@ export const useHabitStore = create<HabitState>()(
           set((state) => {
             const createdAt = nowIso()
             const newHabit = normalizeHabit({
-              id: Date.now().toString(),
+              id: crypto.randomUUID(),
               name,
               iconEmoji,
               color,
@@ -266,6 +273,14 @@ export const useHabitStore = create<HabitState>()(
             newLogs[yearStr][monthStr][habitId][dayStr] = completed
             return { logs: newLogs }
           }),
+
+        setFullData: ({ habits, logs, profile, settings }) =>
+          set((state) => ({
+            habits,
+            logs,
+            profile: profile ? { ...state.profile, ...profile } : state.profile,
+            settings: settings ? { ...state.settings, ...settings } : state.settings,
+          })),
 
         saveProgressBackup: (source) => {
           const state = get()

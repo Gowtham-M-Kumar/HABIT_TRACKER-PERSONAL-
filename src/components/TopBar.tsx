@@ -19,8 +19,8 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenSettings }) => {
   const initial = profile.name ? profile.name.charAt(0).toUpperCase() : 'U'
 
   return (
-    <header className="sticky top-0 z-40 border-b border-app-border/80 dark:border-zinc-800 bg-white/75 dark:bg-zinc-950/85 backdrop-blur-xl shadow-sm">
-      <div className="max-w-[1500px] mx-auto px-4 md:px-6 py-3">
+    <header className="sticky top-0 z-40 border-b border-app-border/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/90 backdrop-blur-xl shadow-sm">
+      <div className="max-w-[1500px] mx-auto px-4 md:px-6 py-2.5 md:py-3">
         <div className="flex items-center gap-3 md:gap-5">
 
           {/* Profile avatar + identity */}
@@ -78,7 +78,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenSettings }) => {
           {/* Settings button */}
           <button
             onClick={onOpenSettings}
-            className="ml-auto p-2.5 rounded-xl border border-app-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink2 dark:text-zinc-300 hover:text-ink hover:bg-slate-50 dark:hover:bg-zinc-700/50 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:border-pink-brand/30 focus:outline-none focus:ring-2 focus:ring-pink-brand/50 flex-shrink-0"
+            className="ml-auto p-2.5 md:p-2.5 rounded-xl border border-app-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink2 dark:text-zinc-300 hover:text-ink hover:bg-slate-50 dark:hover:bg-zinc-700/50 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:border-pink-brand/30 focus:outline-none focus:ring-2 focus:ring-pink-brand/50 flex-shrink-0 touch-manipulation active:scale-95"
             aria-label="Open settings"
           >
             <SettingsIcon className="w-4 h-4" />
@@ -86,12 +86,9 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenSettings }) => {
         </div>
 
         {/* Mobile affirmation strip */}
-        <div className="md:hidden mt-2.5 pt-2.5 border-t border-app-border/50 dark:border-zinc-800/80">
-          <p className="text-[10px] italic text-ink2 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+        <div className="md:hidden mt-2 pt-2 border-t border-app-border/40 dark:border-zinc-800/80">
+          <p className="text-[11px] italic text-ink2 dark:text-zinc-400 line-clamp-1 leading-relaxed">
             &ldquo;{affirmation}&rdquo;
-          </p>
-          <p className="text-[9px] font-medium text-pink-dark dark:text-pink-brand mt-1.5 line-clamp-1">
-            {motivationalMessage}
           </p>
         </div>
       </div>

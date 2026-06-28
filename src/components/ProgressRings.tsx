@@ -94,12 +94,12 @@ export const ProgressRings: React.FC = () => {
   }, [habits, logs, selectedYear, selectedMonth])
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow flex flex-col justify-between h-full min-h-[160px] hover:border-green-brand/30 transition-colors duration-300">
-      <span className="text-[11px] font-bold tracking-wider uppercase text-ink3 dark:text-zinc-400 block">
+    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl p-4 card-shadow flex flex-col justify-between min-h-0 md:min-h-[160px] hover:border-green-brand/30 transition-colors duration-300">
+      <span className="text-[13px] md:text-[11px] font-bold tracking-tight md:tracking-wider md:uppercase text-ink dark:text-zinc-100 md:text-ink3 md:dark:text-zinc-400 block">
         Daily Progress
       </span>
 
-      <div className="grid grid-cols-2 gap-3 flex-1 items-center mt-2">
+      <div className="grid grid-cols-2 gap-4 md:gap-3 flex-1 items-center mt-3 md:mt-2">
         {/* Ring 1: Today's Completion */}
         <div className="flex flex-col items-center justify-center group cursor-default">
           <div className="transition-transform duration-200 group-hover:scale-105">

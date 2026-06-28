@@ -45,7 +45,7 @@ const DayCell: React.FC<DayCellProps> = ({
         damping: 15
       }}
       className={`
-        w-5 h-5 rounded-[4px] border flex-shrink-0 cursor-pointer flex items-center justify-center transition-colors duration-150 relative spring-pop
+        w-7 h-7 md:w-5 md:h-5 rounded-lg md:rounded-[4px] border flex-shrink-0 cursor-pointer flex items-center justify-center transition-colors duration-150 relative spring-pop touch-manipulation
         ${isCompleted 
           ? 'border-transparent text-white' 
           : isWeekend 
@@ -83,27 +83,24 @@ export const HabitGrid: React.FC = () => {
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1)
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-app-border dark:border-zinc-800 rounded-xl overflow-hidden card-shadow">
-      {/* Header Panel */}
-      <div className="px-4 py-3 bg-pink-light/30 dark:bg-zinc-900/20 border-b border-app-border dark:border-zinc-800 flex items-center justify-between">
-        <span className="text-[11px] font-bold tracking-wider uppercase text-ink3 dark:text-zinc-400 flex items-center gap-1.5">
-          📅 Habit Grid
-        </span>
-        <span className="text-[10px] text-ink2 dark:text-zinc-500 font-medium">
-          Horizontal scroll for 31 days
-        </span>
+    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl overflow-hidden card-shadow">
+      <div className="px-4 py-3.5 border-b border-app-border/60 dark:border-zinc-800">
+        <h2 className="text-[13px] md:text-[11px] font-bold tracking-tight md:tracking-wider md:uppercase text-ink dark:text-zinc-100 md:text-ink3 md:dark:text-zinc-400">
+          Full Calendar Grid
+        </h2>
+        <p className="text-[11px] text-ink3 dark:text-zinc-500 mt-0.5">
+          <span className="md:hidden">Scroll horizontally for all days</span>
+          <span className="hidden md:inline">Horizontal scroll for 31 days</span>
+        </p>
       </div>
 
-      <div className="p-4 overflow-x-auto no-scrollbar scroll-smooth">
-        <div className="min-w-[820px] flex flex-col select-none">
-          {/* Day Headers Row */}
-          <div className="flex items-center mb-2.5">
-            {/* Corner Cell */}
+      <div className="p-3 md:p-4 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain">
+        <div className="min-w-0 md:min-w-[820px] flex flex-col select-none">
+          {/* Day Headers Row — desktop layout */}
+          <div className="hidden md:flex items-center mb-2.5">
             <div className="w-[180px] pr-4 text-[10px] font-bold uppercase tracking-wider text-ink3 dark:text-zinc-500 text-left">
               Habit
             </div>
-            
-            {/* Days Cells */}
             <div className="flex gap-[3px]">
               {daysArray.map((day) => {
                 const dayLabel = getDayOfWeekLabel(selectedYear, selectedMonth, day)
@@ -114,10 +111,10 @@ export const HabitGrid: React.FC = () => {
                   <div
                     key={day}
                     className={`w-5 flex flex-col items-center justify-center ${
-                      isToday 
-                        ? 'text-blue-dark dark:text-blue-brand font-bold' 
-                        : isWeekend 
-                          ? 'text-ink3 dark:text-zinc-500 font-semibold' 
+                      isToday
+                        ? 'text-blue-dark dark:text-blue-brand font-bold'
+                        : isWeekend
+                          ? 'text-ink3 dark:text-zinc-500 font-semibold'
                           : 'text-ink2 dark:text-zinc-400'
                     }`}
                   >
@@ -137,43 +134,46 @@ export const HabitGrid: React.FC = () => {
               No habits defined. Add habits in settings.
             </div>
           ) : (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-0 md:gap-1.5 divide-y md:divide-y-0 divide-app-border/40 dark:divide-zinc-800/60">
               {activeHabits.map((habit) => {
                 const habitLogs = logs[selectedYear.toString()]?.[selectedMonth.toString()]?.[habit.id] || {}
 
                 return (
-                  <div key={habit.id} className="flex items-center py-0.5 hover:bg-slate-50 dark:hover:bg-zinc-800/20 rounded transition-colors duration-150">
-                    {/* Habit Title Column */}
-                    <div className="w-[180px] pr-4 flex items-center gap-2 text-left truncate">
-                      <span className="text-sm select-none" role="img" aria-label={habit.name}>
+                  <div
+                    key={habit.id}
+                    className="flex items-center gap-2.5 py-3 md:py-0.5 md:hover:bg-slate-50 dark:md:hover:bg-zinc-800/20 rounded transition-colors duration-150"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0 w-[108px] md:w-[180px] md:pr-4">
+                      <span className="text-[17px] md:text-sm select-none" role="img" aria-label={habit.name}>
                         {habit.iconEmoji || '✨'}
                       </span>
-                      <span className="text-[12px] font-semibold text-ink dark:text-zinc-200 truncate" title={habit.name}>
+                      <span className="text-[13px] md:text-[12px] font-semibold text-ink dark:text-zinc-200 truncate" title={habit.name}>
                         {habit.name}
                       </span>
                     </div>
 
-                    {/* Day Checkboxes */}
-                    <div className="flex gap-[3px]">
-                      {daysArray.map((day) => {
-                        const isCompleted = !!habitLogs[day.toString()]
-                        const dayLabel = getDayOfWeekLabel(selectedYear, selectedMonth, day)
-                        const isWeekend = dayLabel === 'S'
-                        const isToday = isCurrentMonth && day === currentDay
+                    <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar">
+                      <div className="flex gap-1.5 md:gap-[3px] w-max md:w-auto">
+                        {daysArray.map((day) => {
+                          const isCompleted = !!habitLogs[day.toString()]
+                          const dayLabel = getDayOfWeekLabel(selectedYear, selectedMonth, day)
+                          const isWeekend = dayLabel === 'S'
+                          const isToday = isCurrentMonth && day === currentDay
 
-                        return (
-                          <DayCell
-                            key={day}
-                            habit={habit}
-                            day={day}
-                            year={selectedYear}
-                            month={selectedMonth}
-                            isCompleted={isCompleted}
-                            isToday={isToday}
-                            isWeekend={isWeekend}
-                          />
-                        )
-                      })}
+                          return (
+                            <DayCell
+                              key={day}
+                              habit={habit}
+                              day={day}
+                              year={selectedYear}
+                              month={selectedMonth}
+                              isCompleted={isCompleted}
+                              isToday={isToday}
+                              isWeekend={isWeekend}
+                            />
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
                 )

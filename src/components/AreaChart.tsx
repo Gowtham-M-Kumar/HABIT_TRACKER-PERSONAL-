@@ -24,17 +24,22 @@ export const AreaChart: React.FC = () => {
   const isEmpty = habits.filter(h => h.active).length === 0
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow h-full min-h-[160px] flex flex-col justify-between hover:border-blue-brand/30 transition-colors duration-300">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-[11px] font-bold tracking-wider uppercase text-ink3 dark:text-zinc-400">
-          📈 Monthly Trend (Daily Completion %)
-        </span>
-        <span className="text-[10px] text-ink2 dark:text-zinc-500 font-mono">
-          1 - {chartData.length} June
+    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl p-4 card-shadow min-h-[200px] md:min-h-[160px] md:h-full flex flex-col justify-between hover:border-blue-brand/30 transition-colors duration-300">
+      <div className="flex justify-between items-start gap-2 mb-2 md:mb-1">
+        <div>
+          <h2 className="text-[13px] md:text-[11px] font-bold tracking-tight md:tracking-wider md:uppercase text-ink dark:text-zinc-100 md:text-ink3 md:dark:text-zinc-400">
+            Monthly Trend
+          </h2>
+          <p className="text-[11px] text-ink3 dark:text-zinc-500 mt-0.5 md:hidden">
+            Daily completion rate
+          </p>
+        </div>
+        <span className="text-[10px] text-ink2 dark:text-zinc-500 font-mono flex-shrink-0">
+          1–{chartData.length}
         </span>
       </div>
 
-      <div className="w-full flex-1 min-h-0 relative">
+      <div className="w-full flex-1 min-h-[160px] md:min-h-0 relative">
         {isEmpty ? (
           <div className="absolute inset-0 flex items-center justify-center text-xs text-ink3 dark:text-zinc-500">
             Add habits to view trend

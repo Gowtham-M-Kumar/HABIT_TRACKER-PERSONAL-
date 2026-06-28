@@ -14,12 +14,17 @@ export const LeaderboardPanel: React.FC = () => {
   }, [habits, logs, selectedYear, selectedMonth])
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow flex flex-col h-full min-h-[200px] hover:border-yellow-brand/30 transition-colors duration-300">
-      <div className="flex items-center justify-between mb-3 border-b border-app-border dark:border-zinc-800 pb-2">
-        <span className="text-[11px] font-bold tracking-wider uppercase text-ink3 dark:text-zinc-400 flex items-center gap-1.5">
-          🏆 Top 10 Leaderboard
-        </span>
-        <span className="text-[9px] text-ink2 dark:text-zinc-500 font-medium">
+    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl p-4 card-shadow flex flex-col min-h-[200px] md:h-full md:min-h-[200px] hover:border-yellow-brand/30 transition-colors duration-300">
+      <div className="flex items-center justify-between mb-3 border-b border-app-border/60 dark:border-zinc-800 pb-3">
+        <div>
+          <h2 className="text-[13px] md:text-[11px] font-bold tracking-tight md:tracking-wider md:uppercase text-ink dark:text-zinc-100 md:text-ink3 md:dark:text-zinc-400">
+            Leaderboard
+          </h2>
+          <p className="text-[11px] text-ink3 dark:text-zinc-500 mt-0.5 md:hidden">
+            Top habits this month
+          </p>
+        </div>
+        <span className="hidden md:inline text-[9px] text-ink2 dark:text-zinc-500 font-medium">
           Ranked by %
         </span>
       </div>
@@ -57,7 +62,7 @@ export const LeaderboardPanel: React.FC = () => {
                       damping: 25,
                       mass: 0.8
                     }}
-                    className="flex items-center justify-between p-2 rounded-lg border border-app-border/40 dark:border-zinc-800/40 hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors duration-150"
+                    className="flex items-center justify-between p-3 md:p-2 rounded-xl md:rounded-lg border border-app-border/40 dark:border-zinc-800/40 bg-slate-50/30 dark:bg-zinc-800/15 md:bg-transparent hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors duration-150"
                   >
                     {/* Left Rank and Name */}
                     <div className="flex items-center gap-2 truncate">

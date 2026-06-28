@@ -15,12 +15,17 @@ export const WeeklySection: React.FC = () => {
   const weeks = useMemo(() => getWeeksInMonth(selectedYear, selectedMonth), [selectedYear, selectedMonth])
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-app-border dark:border-zinc-800 rounded-xl p-4 card-shadow flex flex-col">
-      <span className="text-[11px] font-bold tracking-wider uppercase text-ink3 dark:text-zinc-400 block mb-3">
-        📊 Weekly Breakdown (Week 1–5)
-      </span>
+    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl p-4 card-shadow flex flex-col">
+      <div className="mb-3">
+        <h2 className="text-[13px] md:text-[11px] font-bold tracking-tight md:tracking-wider md:uppercase text-ink dark:text-zinc-100 md:text-ink3 md:dark:text-zinc-400">
+          Weekly Breakdown
+        </h2>
+        <p className="text-[11px] text-ink3 dark:text-zinc-500 mt-0.5 md:hidden">
+          Swipe to see all weeks
+        </p>
+      </div>
 
-      <div className="grid grid-cols-5 gap-3 flex-1">
+      <div className="flex md:grid md:grid-cols-5 gap-3 overflow-x-auto no-scrollbar overscroll-x-contain pb-1 -mx-1 px-1 md:mx-0 md:px-0 md:overflow-visible md:pb-0 flex-1">
         {weeks.map((week, weekIndex) => {
           const colors = WEEK_COLORS[weekIndex % WEEK_COLORS.length]
           const weekPercentage = getWeeklyCompletionPercentage(habits, logs, selectedYear, selectedMonth, week.days)
@@ -35,10 +40,10 @@ export const WeeklySection: React.FC = () => {
           })
 
           return (
-            <div 
-              key={week.name} 
+            <div
+              key={week.name}
               style={{ backgroundColor: colors.light }}
-              className="rounded-lg p-2 flex flex-col justify-between items-center text-center dark:bg-zinc-800/20 dark:border dark:border-zinc-800 border border-transparent transition-colors duration-150"
+              className="min-w-[132px] flex-shrink-0 md:min-w-0 md:flex-shrink rounded-xl md:rounded-lg p-3 md:p-2 flex flex-col justify-between items-center text-center dark:bg-zinc-800/20 dark:border dark:border-zinc-800 border border-transparent transition-colors duration-150"
             >
               {/* Week Title */}
               <span 

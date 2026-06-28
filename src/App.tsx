@@ -8,15 +8,14 @@ import { WeeklySection } from './components/WeeklySection'
 import { LeaderboardPanel } from './components/LeaderboardPanel'
 import { HabitTrackingSection } from './components/HabitTrackingSection'
 import { MobileHabitTracking } from './components/MobileHabitTracking'
-import { HabitGrid } from './components/HabitGrid'
 import { ProgressTable } from './components/ProgressTable'
 import { SettingsDrawer } from './components/SettingsDrawer'
 import { useMidnightBackup } from './hooks/useMidnightBackup'
 import { useCloudSync } from './hooks/useCloudSync'
 import { applyTheme } from './utils/theme'
-import { LayoutDashboard, BarChart3, Trophy, Heart } from 'lucide-react'
+import { LayoutDashboard, Trophy, Heart } from 'lucide-react'
 
-type MobileTab = 'dashboard' | 'charts' | 'progress'
+type MobileTab = 'dashboard' | 'progress'
 
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -86,13 +85,8 @@ function App() {
             <>
               <MonthHero />
               <MobileHabitTracking />
-              <ProgressRings />
-              <WeeklySection />
-            </>
-          )}
-          {activeTab === 'charts' && (
-            <>
               <AreaChart />
+              <ProgressRings />
               <WeeklySection />
             </>
           )}
@@ -100,7 +94,6 @@ function App() {
             <>
               <LeaderboardPanel />
               <ProgressTable />
-              <HabitGrid />
             </>
           )}
         </div>
@@ -111,7 +104,6 @@ function App() {
         <div className="flex justify-around items-stretch h-[3.5rem] px-2 pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]">
           {([
             ['dashboard', LayoutDashboard, 'Home'],
-            ['charts', BarChart3, 'Charts'],
             ['progress', Trophy, 'Stats'],
           ] as const).map(([id, Icon, label]) => {
             const isActive = activeTab === id

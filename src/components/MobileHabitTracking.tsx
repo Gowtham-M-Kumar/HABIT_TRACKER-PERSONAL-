@@ -66,7 +66,7 @@ interface HabitRowProps {
   isCurrentMonth: boolean
   currentDay: number
   habitLogs: Record<string, boolean>
-  scrollRef?: React.RefObject<HTMLDivElement | null>
+  scrollRef?: (node: HTMLDivElement | null) => void
 }
 
 const HabitRow: React.FC<HabitRowProps> = ({
@@ -132,14 +132,16 @@ export const MobileHabitTracking: React.FC = () => {
   const currentDay = today.getDate()
   const isCurrentMonth = today.getMonth() + 1 === selectedMonth && today.getFullYear() === selectedYear
 
-  const firstRowScrollRef = useRef<HTMLDivElement>(null)
+  const scrollRefs = useRef<Array<HTMLDivElement | null>>([])
 
   useEffect(() => {
-    if (!isCurrentMonth || !firstRowScrollRef.current) return
+    if (!isCurrentMonth) return
     const cellWidth = 28 + 6
     const scrollTo = Math.max(0, (currentDay - 3) * cellWidth)
-    firstRowScrollRef.current.scrollLeft = scrollTo
-  }, [isCurrentMonth, currentDay, selectedMonth, selectedYear])
+    scrollRefs.current.forEach((node) => {
+      if (node) node.scrollLeft = scrollTo
+    })
+  }, [isCurrentMonth, currentDay, selectedMonth, selectedYear, activeHabits.length])
 
   const tableData = useMemo(
     () =>
@@ -192,7 +194,7 @@ export const MobileHabitTracking: React.FC = () => {
                   isCurrentMonth={isCurrentMonth}
                   currentDay={currentDay}
                   habitLogs={habitLogs}
-                  scrollRef={index === 0 ? firstRowScrollRef : undefined}
+                  scrollRef={(node) => { scrollRefs.current[index] = node }}
                 />
               )
             })}

@@ -224,11 +224,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       await supabase.auth.updateUser({ data: { name } })
-      await supabase.from('user_profiles').upsert({ id: user.id, name })
-      useHabitStore.getState().updateProfile({ name })
+      const { error } = await supabase.from('user_profiles').upsert({ id: user.id, name })
+      if (error) {
+        console.error('[AuthStore] updateDisplayName user_profiles upsert error', error)
+        throw error
+      }
+      await useHabitStore.getState().updateProfile({ name })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Update failed.'
       set({ error: msg })
+      throw err
     } finally {
       set({ isLoading: false })
     }

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { supabase } from '../lib/supabase'
 import {
   formatBackupLabel,
   getLatestBackup,
@@ -55,13 +56,13 @@ interface HabitState {
   cloudUserId: string | null
 
   setDate: (year: number, month: number) => void
-  toggleDay: (year: number, month: number, habitId: string, day: number) => void
-  addHabit: (name: string, iconEmoji: string, color: string, goal: number) => void
-  updateHabit: (id: string, updates: Partial<Habit>) => void
-  deleteHabit: (id: string) => void
-  reorderHabits: (startIndex: number, endIndex: number) => void
-  updateProfile: (updates: Partial<Profile>) => void
-  updateSettings: (updates: Partial<Settings>) => void
+  toggleDay: (year: number, month: number, habitId: string, day: number) => Promise<void>
+  addHabit: (name: string, iconEmoji: string, color: string, goal: number) => Promise<void>
+  updateHabit: (id: string, updates: Partial<Habit>) => Promise<void>
+  deleteHabit: (id: string) => Promise<void>
+  reorderHabits: (startIndex: number, endIndex: number) => Promise<void>
+  updateProfile: (updates: Partial<Profile>) => Promise<void>
+  updateSettings: (updates: Partial<Settings>) => Promise<void>
   resetData: () => void
   clearDatabase: () => void
   saveProgressBackup: (source: BackupSource) => void
@@ -96,6 +97,16 @@ function normalizeHabit(raw: Partial<Habit> & { id: string; name: string }): Hab
     completed: raw.completed ?? false,
     dueDate: raw.dueDate ?? null,
   }
+}
+
+async function getAuthenticatedUserId(): Promise<string | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase.auth.getUser()
+  if (error) {
+    console.error('[HabitStore] getAuthenticatedUserId error', error)
+    return null
+  }
+  return data?.user?.id ?? null
 }
 
 const DEFAULT_HABITS: Habit[] = [
@@ -195,36 +206,56 @@ export const useHabitStore = create<HabitState>()(
 
         setDate: (year, month) => set({ selectedYear: year, selectedMonth: month }),
 
-        toggleDay: (year, month, habitId, day) =>
+        toggleDay: async (year, month, habitId, day) => {
+          const yearStr = year.toString()
+          const monthStr = month.toString()
+          const dayStr = day.toString()
+          const currentVal = !!get().logs[yearStr]?.[monthStr]?.[habitId]?.[dayStr]
+
           set((state) => {
-            const yearStr = year.toString()
-            const monthStr = month.toString()
-            const dayStr = day.toString()
             const newLogs = { ...state.logs }
 
             if (!newLogs[yearStr]) newLogs[yearStr] = {}
             if (!newLogs[yearStr][monthStr]) newLogs[yearStr][monthStr] = {}
             if (!newLogs[yearStr][monthStr][habitId]) newLogs[yearStr][monthStr][habitId] = {}
 
-            const currentVal = !!newLogs[yearStr][monthStr][habitId][dayStr]
             newLogs[yearStr][monthStr][habitId][dayStr] = !currentVal
 
             return { logs: newLogs, hasCustomData: true }
-          }),
+          })
 
-        addHabit: (name, iconEmoji, color, goal) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const completed = await supabase
+            .from('completion_logs')
+            .upsert(
+              [{
+                user_id: userId,
+                habit_id: habitId,
+                year,
+                month,
+                day,
+                completed: !currentVal,
+              }],
+              { onConflict: 'user_id,habit_id,year,month,day' },
+            )
+          if (completed.error) console.error('[HabitStore] toggleDay upsert error', completed.error)
+        },
+
+        addHabit: async (name, iconEmoji, color, goal) => {
+          const createdAt = nowIso()
+          const newHabit = normalizeHabit({
+            id: crypto.randomUUID(),
+            name,
+            iconEmoji,
+            color,
+            goal,
+            createdAt,
+            updatedAt: createdAt,
+          })
+
+          const sortOrder = get().habits.length
           set((state) => {
-            const createdAt = nowIso()
-            const newHabit = normalizeHabit({
-              id: crypto.randomUUID(),
-              name,
-              iconEmoji,
-              color,
-              goal,
-              createdAt,
-              updatedAt: createdAt,
-            })
-
             const yearStr = state.selectedYear.toString()
             const monthStr = state.selectedMonth.toString()
             const newLogs = { ...state.logs }
@@ -237,43 +268,115 @@ export const useHabitStore = create<HabitState>()(
               logs: newLogs,
               hasCustomData: true,
             }
-          }),
+          })
 
-        updateHabit: (id, updates) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const { error } = await supabase.from('habits').insert([
+            {
+              id: newHabit.id,
+              user_id: userId,
+              name: newHabit.name,
+              color: newHabit.color,
+              goal: newHabit.goal,
+              icon_emoji: newHabit.iconEmoji,
+              created_at: newHabit.createdAt,
+              updated_at: newHabit.updatedAt,
+              active: newHabit.active,
+              completed: newHabit.completed,
+              due_date: newHabit.dueDate,
+              sort_order: sortOrder,
+            },
+          ])
+          if (error) console.error('[HabitStore] addHabit insert error', error)
+        },
+
+        updateHabit: async (id, updates) => {
           set((state) => ({
             habits: state.habits.map((h) =>
               h.id === id ? updateHabitTimestamp(h, updates) : h,
             ),
             hasCustomData: true,
-          })),
+          }))
 
-        deleteHabit: (id) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const { error } = await supabase.from('habits').update({
+            ...updates,
+            updated_at: nowIso(),
+          }).eq('id', id).eq('user_id', userId)
+          if (error) console.error('[HabitStore] updateHabit error', error)
+        },
+
+        deleteHabit: async (id) => {
           set((state) => ({
             habits: state.habits.filter((h) => h.id !== id),
             hasCustomData: true,
-          })),
+          }))
 
-        reorderHabits: (startIndex, endIndex) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const { error } = await supabase.from('habits').delete().eq('id', id).eq('user_id', userId)
+          if (error) console.error('[HabitStore] deleteHabit error', error)
+        },
+
+        reorderHabits: async (startIndex, endIndex) => {
           set((state) => {
             const result = Array.from(state.habits)
             const [removed] = result.splice(startIndex, 1)
             result.splice(endIndex, 0, removed)
             return { habits: result }
-          }),
+          })
 
-        updateProfile: (updates) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const state = get()
+          const rows = state.habits.map((habit, index) => ({
+            id: habit.id,
+            user_id: userId,
+            sort_order: index,
+          }))
+          const { error } = await supabase.from('habits').upsert(rows, { onConflict: 'id' })
+          if (error) console.error('[HabitStore] reorderHabits error', error)
+        },
+
+        updateProfile: async (updates) => {
           set((state) => ({
             profile: { ...state.profile, ...updates },
             hasCustomData: true,
-          })),
+          }))
 
-        updateSettings: (updates) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const profileUpdate = await supabase.from('user_profiles').upsert({
+            id: userId,
+            name: updates.name ?? get().profile.name,
+            affirmation_text: updates.affirmationText ?? get().profile.affirmationText,
+            photo_url: updates.photoDataURL ?? get().profile.photoDataURL,
+          })
+          if (profileUpdate.error) console.error('[HabitStore] updateProfile error', profileUpdate.error)
+        },
+
+        updateSettings: async (updates) => {
           set((state) => ({
             settings: { ...state.settings, ...updates },
             hasCustomData: true,
-          })),
+          }))
 
-        setTodayCompletion: (habitId, completed) =>
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const settingsUpdate = await supabase.from('user_settings').upsert({
+            id: userId,
+            dark_mode: updates.darkMode ?? get().settings.darkMode,
+            accent_color: updates.accentColor ?? get().settings.accentColor,
+            show_weekends: updates.showWeekends ?? get().settings.showWeekends,
+            start_day_of_week: updates.startDayOfWeek ?? get().settings.startDayOfWeek,
+            app_version: updates.appVersion ?? get().settings.appVersion,
+          })
+          if (settingsUpdate.error) console.error('[HabitStore] updateSettings error', settingsUpdate.error)
+        },
+
+        setTodayCompletion: async (habitId, completed) => {
           set((state) => {
             const now = new Date()
             const yearStr = now.getFullYear().toString()
@@ -284,8 +387,23 @@ export const useHabitStore = create<HabitState>()(
             if (!newLogs[yearStr][monthStr]) newLogs[yearStr][monthStr] = {}
             if (!newLogs[yearStr][monthStr][habitId]) newLogs[yearStr][monthStr][habitId] = {}
             newLogs[yearStr][monthStr][habitId][dayStr] = completed
-            return { logs: newLogs }
-          }),
+            return { logs: newLogs, hasCustomData: true }
+          })
+
+          const userId = await getAuthenticatedUserId()
+          if (!supabase || !userId) return
+          const { error } = await supabase.from('completion_logs').upsert([
+            {
+              user_id: userId,
+              habit_id: habitId,
+              year: new Date().getFullYear(),
+              month: new Date().getMonth() + 1,
+              day: new Date().getDate(),
+              completed,
+            },
+          ], { onConflict: 'user_id,habit_id,year,month,day' })
+          if (error) console.error('[HabitStore] setTodayCompletion upsert error', error)
+        },
 
         setFullData: ({ habits, logs, profile, settings, cloudUserId = null, fromCloud = false }) =>
           set((state) => ({

@@ -218,7 +218,7 @@ const LoginForm: React.FC<{ onSwitch: (v: AuthView) => void }> = ({ onSwitch }) 
 
 // ─── Sign Up Form ─────────────────────────────────────────────────────────────
 
-const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: () => void }> = ({ onSwitch, onSuccess }) => {
+const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: (signedIn: boolean) => void }> = ({ onSwitch, onSuccess }) => {
   const { signUp, isLoading, error, setError } = useAuthStore()
   const habitState = useHabitStore.getState()
   const [name, setName] = useState('')
@@ -226,7 +226,8 @@ const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: () => v
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-  const [wantsMigration, setWantsMigration] = useState(habitState.habits.length > 0)
+  const [wantsMigration, setWantsMigration] = useState(habitState.hasCustomData)
+  const hasCustomData = habitState.hasCustomData
 
   useEffect(() => { setError(null) }, [setError])
 
@@ -247,20 +248,19 @@ const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: () => v
     setFieldErrors(errs)
     if (Object.keys(errs).length > 0) return
     try {
-      await signUp(email, password, name)
-      // Migrate guest data if opted in
-      if (wantsMigration) {
+      const result = await signUp(email, password, name)
+      if (wantsMigration && hasCustomData) {
         const { user } = useAuthStore.getState()
         if (user) {
           await migrateGuestDataToCloud(user.id, {
             habits: habitState.habits,
             logs: habitState.logs,
-            profile: habitState.profile,
+            profile: { ...habitState.profile, name },
             settings: habitState.settings,
           })
         }
       }
-      onSuccess()
+      onSuccess(result?.signedIn ?? false)
     } catch { /* error shown via store */ }
   }
 
@@ -309,6 +309,25 @@ const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: () => v
       )}
 
       <SubmitButton isLoading={isLoading} label="Create Account" />
+
+      {hasCustomData && hasLocalHabits && (
+        <label className="flex items-start gap-2.5 cursor-pointer group bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/30 rounded-xl p-3">
+          <input
+            type="checkbox"
+            checked={wantsMigration}
+            onChange={(e) => setWantsMigration(e.target.checked)}
+            className="mt-0.5 w-3.5 h-3.5 rounded accent-purple-500 cursor-pointer flex-shrink-0"
+          />
+          <div>
+            <p className="text-xs font-semibold text-purple-800 dark:text-purple-300">
+              Import my {habitState.habits.length} existing habit{habitState.habits.length !== 1 ? 's' : ''} to cloud
+            </p>
+            <p className="text-[10px] text-purple-600/70 dark:text-purple-400/60 mt-0.5 leading-relaxed">
+              Your local progress and history will be synced to your new account.
+            </p>
+          </div>
+        </label>
+      )}
 
       <p className="text-center text-[10px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
         By creating an account, you agree to use this app responsibly.
@@ -456,10 +475,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const meta = VIEW_META[authView]
 
-  const handleSignUpSuccess = () => {
+  const handleSignUpSuccess = (signedIn: boolean) => {
+    if (signedIn) {
+      onClose()
+      return
+    }
+
     setCheckEmailTitle('Verify your email')
     setCheckEmailMessage(
-      'We sent a verification link to your inbox. Click it to activate your account, then sign in. (You can skip this in development by disabling email confirmation in Supabase.)'
+      'We sent a verification link to your inbox. Click it to activate your account, then sign in. If you want immediate login on signup, disable email confirmation in Supabase Auth settings.'
     )
     setAuthView('check-email')
   }

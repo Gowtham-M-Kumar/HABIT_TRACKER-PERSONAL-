@@ -51,6 +51,7 @@ interface HabitState {
   settings: Settings
   selectedMonth: number
   selectedYear: number
+  hasCustomData: boolean
 
   setDate: (year: number, month: number) => void
   toggleDay: (year: number, month: number, habitId: string, day: number) => void
@@ -184,6 +185,7 @@ export const useHabitStore = create<HabitState>()(
         },
         selectedMonth: 6,
         selectedYear: 2026,
+        hasCustomData: false,
 
         setDate: (year, month) => set({ selectedYear: year, selectedMonth: month }),
 
@@ -201,7 +203,7 @@ export const useHabitStore = create<HabitState>()(
             const currentVal = !!newLogs[yearStr][monthStr][habitId][dayStr]
             newLogs[yearStr][monthStr][habitId][dayStr] = !currentVal
 
-            return { logs: newLogs }
+            return { logs: newLogs, hasCustomData: true }
           }),
 
         addHabit: (name, iconEmoji, color, goal) =>
@@ -227,6 +229,7 @@ export const useHabitStore = create<HabitState>()(
             return {
               habits: [...state.habits, newHabit],
               logs: newLogs,
+              hasCustomData: true,
             }
           }),
 
@@ -235,11 +238,13 @@ export const useHabitStore = create<HabitState>()(
             habits: state.habits.map((h) =>
               h.id === id ? updateHabitTimestamp(h, updates) : h,
             ),
+            hasCustomData: true,
           })),
 
         deleteHabit: (id) =>
           set((state) => ({
             habits: state.habits.filter((h) => h.id !== id),
+            hasCustomData: true,
           })),
 
         reorderHabits: (startIndex, endIndex) =>
@@ -253,11 +258,13 @@ export const useHabitStore = create<HabitState>()(
         updateProfile: (updates) =>
           set((state) => ({
             profile: { ...state.profile, ...updates },
+            hasCustomData: true,
           })),
 
         updateSettings: (updates) =>
           set((state) => ({
             settings: { ...state.settings, ...updates },
+            hasCustomData: true,
           })),
 
         setTodayCompletion: (habitId, completed) =>
@@ -280,6 +287,7 @@ export const useHabitStore = create<HabitState>()(
             logs,
             profile: profile ? { ...state.profile, ...profile } : state.profile,
             settings: settings ? { ...state.settings, ...settings } : state.settings,
+            hasCustomData: true,
           })),
 
         saveProgressBackup: (source) => {
@@ -333,6 +341,7 @@ export const useHabitStore = create<HabitState>()(
           set({
             habits,
             logs: generateDemoLogs(habits),
+            hasCustomData: false,
           })
         },
 
@@ -362,6 +371,7 @@ export const useHabitStore = create<HabitState>()(
             },
             selectedMonth: new Date().getMonth() + 1,
             selectedYear: new Date().getFullYear(),
+            hasCustomData: true,
           })
         },
       }
@@ -375,6 +385,7 @@ export const useHabitStore = create<HabitState>()(
         settings: state.settings,
         selectedMonth: state.selectedMonth,
         selectedYear: state.selectedYear,
+        hasCustomData: state.hasCustomData,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return

@@ -23,7 +23,7 @@ interface AuthState {
 
   // ── Actions ──────────────────────────────────────────────────────────────────
   initialize: () => Promise<void>
-  signUp: (email: string, password: string, name: string) => Promise<void>
+  signUp: (email: string, password: string, name: string) => Promise<{ signedIn: boolean }>
   signIn: (email: string, password: string, rememberMe: boolean) => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
@@ -89,17 +89,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!supabase) throw new Error('Auth not configured')
     setAuthPersistence(false)
     set({ isLoading: true, error: null })
+
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { name } },
       })
       if (error) throw error
+
       localStorage.setItem(SEEN_LANDING_KEY, 'true')
       set({ loginAttempts: 0, lockoutExpiresAt: null })
+
+      if (data?.session) {
+        set({ user: data.user, session: data.session, mode: 'cloud', isAuthModalOpen: false })
+        return { signedIn: true }
+      }
+
+      // Attempt a fallback sign-in in case Supabase did not return a session.
+      try {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+        if (!signInError) {
+          const sessionResult = await supabase.auth.getSession()
+          const session = sessionResult.data.session
+          set({ session, user: session?.user ?? null, mode: session ? 'cloud' : 'guest', isAuthModalOpen: false })
+          return { signedIn: !!session }
+        }
+      } catch {
+        // ignore fallback failure; likely email verification is required
+      }
+
+      return { signedIn: false }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Sign up failed. Please try again.'
+      let msg = 'Sign up failed. Please try again.'
+      if (err instanceof Error) {
+        msg = err.message
+      }
       set({ error: msg })
       throw err
     } finally {
@@ -129,7 +154,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (err: unknown) {
       const attempts = loginAttempts + 1
       const lockoutExpiresAt = attempts >= 5 ? Date.now() + 2 * 60 * 1000 : null
-      const msg = err instanceof Error ? err.message : 'Sign in failed. Please try again.'
+      let msg = 'Sign in failed. Please try again.'
+      if (err instanceof Error) {
+        msg = err.message
+        if (/email.*confirm/i.test(msg) || /confirm your email/i.test(msg)) {
+          msg = 'Your email is not verified yet. Check your inbox for a verification link.'
+        }
+      }
       set({ error: msg, loginAttempts: attempts, lockoutExpiresAt })
       throw err
     } finally {

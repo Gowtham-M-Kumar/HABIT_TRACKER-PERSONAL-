@@ -289,7 +289,7 @@ const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: (signed
         onChange={setConfirmPassword} autoComplete="new-password" error={fieldErrors.confirmPassword}
       />
 
-      {hasLocalHabits && (
+      {hasCustomData && hasLocalHabits && (
         <label className="flex items-start gap-2.5 cursor-pointer group bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/30 rounded-xl p-3">
           <input
             type="checkbox"
@@ -309,25 +309,6 @@ const SignUpForm: React.FC<{ onSwitch: (v: AuthView) => void; onSuccess: (signed
       )}
 
       <SubmitButton isLoading={isLoading} label="Create Account" />
-
-      {hasCustomData && hasLocalHabits && (
-        <label className="flex items-start gap-2.5 cursor-pointer group bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/30 rounded-xl p-3">
-          <input
-            type="checkbox"
-            checked={wantsMigration}
-            onChange={(e) => setWantsMigration(e.target.checked)}
-            className="mt-0.5 w-3.5 h-3.5 rounded accent-purple-500 cursor-pointer flex-shrink-0"
-          />
-          <div>
-            <p className="text-xs font-semibold text-purple-800 dark:text-purple-300">
-              Import my {habitState.habits.length} existing habit{habitState.habits.length !== 1 ? 's' : ''} to cloud
-            </p>
-            <p className="text-[10px] text-purple-600/70 dark:text-purple-400/60 mt-0.5 leading-relaxed">
-              Your local progress and history will be synced to your new account.
-            </p>
-          </div>
-        </label>
-      )}
 
       <p className="text-center text-[10px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
         By creating an account, you agree to use this app responsibly.

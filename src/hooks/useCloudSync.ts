@@ -75,22 +75,61 @@ function settingsFromDb(row: DbSettings | null): Partial<Settings> | undefined {
 
 // ─── Cloud Data Loader ────────────────────────────────────────────────────────
 
-async function loadCloudData(userId: string): Promise<void> {
+async function loadCloudData(user: { id: string; user_metadata?: Record<string, unknown> | null }): Promise<void> {
   if (!supabase) return
+  const userId = user.id
 
   const [habitsRes, logsRes, profileRes, settingsRes] = await Promise.all([
     supabase.from('habits').select('*').eq('user_id', userId).order('sort_order'),
     supabase.from('completion_logs').select('*').eq('user_id', userId),
-    supabase.from('user_profiles').select('*').eq('id', userId).single(),
-    supabase.from('user_settings').select('*').eq('id', userId).single(),
+    supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+    supabase.from('user_settings').select('*').eq('id', userId).maybeSingle(),
   ])
+
+  if (habitsRes.error || logsRes.error) {
+    console.error('[CloudSync] loadCloudData error', {
+      habitsError: habitsRes.error,
+      logsError: logsRes.error,
+    })
+    return
+  }
 
   const habits: Habit[] = ((habitsRes.data as DbHabit[]) ?? []).map(habitFromDb)
   const logs: CompletionLogs = logsFromDb((logsRes.data as DbLog[]) ?? [])
-  const profile = profileFromDb(profileRes.data as DbProfile | null)
-  const settings = settingsFromDb(settingsRes.data as DbSettings | null)
+  const profile = profileFromDb(profileRes.data as DbProfile | null) ?? {
+    name: (user.user_metadata?.name as string) ?? '',
+    affirmationText: 'Consistency beats talent when talent fails to be consistent.',
+    photoDataURL: '',
+  }
+  const settings = settingsFromDb(settingsRes.data as DbSettings | null) ?? {
+    darkMode: false,
+    accentColor: '#F4A0B8',
+    showWeekends: true,
+    startDayOfWeek: 1,
+    appVersion: '1.0.0',
+  }
 
-  useHabitStore.getState().setFullData({ habits, logs, profile, settings })
+  if (!profileRes.data) {
+    await supabase.from('user_profiles').upsert({
+      id: userId,
+      name: profile.name,
+      affirmation_text: profile.affirmationText,
+      photo_url: profile.photoDataURL,
+    })
+  }
+
+  if (!settingsRes.data) {
+    await supabase.from('user_settings').upsert({
+      id: userId,
+      dark_mode: settings.darkMode,
+      accent_color: settings.accentColor,
+      show_weekends: settings.showWeekends,
+      start_day_of_week: settings.startDayOfWeek,
+      app_version: settings.appVersion,
+    })
+  }
+
+  useHabitStore.getState().setFullData({ habits, logs, profile, settings, cloudUserId: userId, fromCloud: true })
 }
 
 // ─── Cloud Writers ────────────────────────────────────────────────────────────
@@ -162,12 +201,21 @@ async function syncChangedLogs(
 
 async function syncProfile(profile: Profile, userId: string): Promise<void> {
   if (!supabase) return
-  await supabase.from('user_profiles').upsert({
-    id: userId,
-    name: profile.name,
-    affirmation_text: profile.affirmationText,
-    photo_url: profile.photoDataURL,
-  })
+  const [profileRes, authRes] = await Promise.all([
+    supabase.from('user_profiles').upsert({
+      id: userId,
+      name: profile.name,
+      affirmation_text: profile.affirmationText,
+      photo_url: profile.photoDataURL,
+    }),
+    supabase.auth.updateUser({ data: { name: profile.name } }).catch((err) => err),
+  ])
+  if (profileRes.error) {
+    console.error('[CloudSync] syncProfile profile upsert error', profileRes.error)
+  }
+  if (authRes && 'message' in authRes) {
+    console.error('[CloudSync] syncProfile auth update error', authRes)
+  }
 }
 
 async function syncSettings(settings: Settings, userId: string): Promise<void> {
@@ -214,7 +262,7 @@ export function useCloudSync(): void {
 
     isLoadingFromCloud.current = true
 
-    loadCloudData(user.id).finally(() => {
+    loadCloudData(user).finally(() => {
       const s = useHabitStore.getState()
       prevHabitsRef.current = s.habits
       prevLogsRef.current = s.logs

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured, setAuthPersistence } from '../lib/supabase'
+import { useHabitStore } from './habitStore'
 
 export type AuthMode = 'guest' | 'cloud'
 export type AuthView = 'login' | 'signup' | 'forgot' | 'check-email' | 'reset-password'
@@ -174,6 +175,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true })
     try {
       await supabase.auth.signOut()
+      useHabitStore.getState().resetToGuestDefaults()
       set({ user: null, session: null, mode: 'guest', isProfileOpen: false })
     } finally {
       set({ isLoading: false })
@@ -221,7 +223,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!user) return
     set({ isLoading: true, error: null })
     try {
+      await supabase.auth.updateUser({ data: { name } })
       await supabase.from('user_profiles').upsert({ id: user.id, name })
+      useHabitStore.getState().updateProfile({ name })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Update failed.'
       set({ error: msg })
@@ -257,6 +261,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // ── Guest Mode ───────────────────────────────────────────────────────────────
   continueAsGuest: () => {
     localStorage.setItem(SEEN_LANDING_KEY, 'true')
+    useHabitStore.getState().resetToGuestDefaults()
     set({ mode: 'guest', isAuthModalOpen: false })
   },
 

@@ -52,6 +52,7 @@ interface HabitState {
   selectedMonth: number
   selectedYear: number
   hasCustomData: boolean
+  cloudUserId: string | null
 
   setDate: (year: number, month: number) => void
   toggleDay: (year: number, month: number, habitId: string, day: number) => void
@@ -73,7 +74,11 @@ interface HabitState {
     logs: CompletionLogs
     profile?: Partial<Profile>
     settings?: Partial<Settings>
+    cloudUserId?: string | null
+    fromCloud?: boolean
   }) => void
+  setCloudUserId: (id: string | null) => void
+  resetToGuestDefaults: () => void
 }
 
 const nowIso = () => new Date().toISOString()
@@ -186,6 +191,7 @@ export const useHabitStore = create<HabitState>()(
         selectedMonth: 6,
         selectedYear: 2026,
         hasCustomData: false,
+        cloudUserId: null,
 
         setDate: (year, month) => set({ selectedYear: year, selectedMonth: month }),
 
@@ -281,13 +287,14 @@ export const useHabitStore = create<HabitState>()(
             return { logs: newLogs }
           }),
 
-        setFullData: ({ habits, logs, profile, settings }) =>
+        setFullData: ({ habits, logs, profile, settings, cloudUserId = null, fromCloud = false }) =>
           set((state) => ({
             habits,
             logs,
             profile: profile ? { ...state.profile, ...profile } : state.profile,
             settings: settings ? { ...state.settings, ...settings } : state.settings,
-            hasCustomData: true,
+            hasCustomData: fromCloud ? false : state.hasCustomData,
+            cloudUserId,
           })),
 
         saveProgressBackup: (source) => {
@@ -303,6 +310,32 @@ export const useHabitStore = create<HabitState>()(
             },
             source,
           )
+        },
+
+        setCloudUserId: (id) => set({ cloudUserId: id }),
+
+        resetToGuestDefaults: () => {
+          const habits = DEFAULT_HABITS
+          set({
+            habits,
+            logs: generateDemoLogs(habits),
+            profile: {
+              name: 'Jane Doe',
+              affirmationText: 'Consistency beats talent when talent fails to be consistent.',
+              photoDataURL: '',
+            },
+            settings: {
+              darkMode: false,
+              accentColor: '#F4A0B8',
+              showWeekends: true,
+              startDayOfWeek: 1,
+              appVersion: '1.0.0',
+            },
+            selectedMonth: 6,
+            selectedYear: 2026,
+            hasCustomData: false,
+            cloudUserId: null,
+          })
         },
 
         restoreProgressBackup: () => {
@@ -378,15 +411,24 @@ export const useHabitStore = create<HabitState>()(
     },
     {
       name: 'habit-tracker-storage',
-      partialize: (state) => ({
-        habits: state.habits,
-        logs: state.logs,
-        profile: state.profile,
-        settings: state.settings,
-        selectedMonth: state.selectedMonth,
-        selectedYear: state.selectedYear,
-        hasCustomData: state.hasCustomData,
-      }),
+      partialize: (state) => {
+        const base = {
+          settings: state.settings,
+          selectedMonth: state.selectedMonth,
+          selectedYear: state.selectedYear,
+          cloudUserId: state.cloudUserId,
+        }
+        if (!state.cloudUserId) {
+          return {
+            ...base,
+            habits: state.habits,
+            logs: state.logs,
+            profile: state.profile,
+            hasCustomData: state.hasCustomData,
+          }
+        }
+        return base
+      },
       onRehydrateStorage: () => (state) => {
         if (!state) return
         state.habits = state.habits.map((h) => migrateHabit(h))

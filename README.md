@@ -6,7 +6,7 @@ This project implements the design specification described in the pre-production
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 - **Live Dashboard**: Every statistic (rings, charts, leaderboard, progress bars, streaks) recalculates instantly on checkbox click.
 - **Unified Layout**:
@@ -18,58 +18,66 @@ This project implements the design specification described in the pre-production
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Prerequisites
 
-Make sure you have Node.js (version 18 or above) installed.
+Node.js 18 or above.
 
 ### Installation
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
-2. Run the local development server:
+2. Start the development server:
+
    ```bash
    npm run dev
    ```
-   Open your browser and navigate to `http://localhost:5173`.
+
+   Open [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 📦 Production & Deployment
+## Production & Deployment
 
-### Build Compilation
+### Build
 
-To generate optimized minified build chunks (located in the `dist/` directory) and verify TypeScript types:
+Generate optimized static assets in `dist/` and verify TypeScript types:
+
 ```bash
 npm run build
 ```
 
-### Deployment to Vercel
+Preview the production build locally:
 
-The application is completely serverless and fits Vercel's free tier.
+```bash
+npm run preview
+```
 
-1. Configure environment variables in Vercel for production:
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
-   - `SESSION_SECRET`
-   - `FRONTEND_URL` (for example `https://your-app.vercel.app`)
-   - `ALLOWED_ORIGINS` (optional comma-separated list of allowed frontend origins)
+### Deploy to Vercel
 
-2. Install the Vercel CLI (or connect your GitHub repository to Vercel):
+This is a **frontend-only** Vite SPA. No backend, API routes, or environment variables are required.
+
+1. Connect the GitHub repository to [Vercel](https://vercel.com), or install the CLI:
+
    ```bash
    npm install -g vercel
    ```
 
-3. Run deployment:
+2. Deploy:
+
    ```bash
    vercel
    ```
 
-4. To deploy to production:
+3. Production deploy:
+
    ```bash
    vercel --prod
    ```
+
+Vercel uses `vercel.json` to run `npm run build` and serve the `dist/` folder with SPA rewrites.

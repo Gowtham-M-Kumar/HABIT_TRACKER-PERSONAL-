@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Mail, Calendar, Flame, CheckSquare, LayoutList, LogOut, Trash2, Shield, Edit3, Check, Loader2, AlertTriangle } from 'lucide-react'
+import { X, Mail, Calendar, Flame, CheckSquare, LayoutList, LogOut, Trash2, Shield, Edit3, Check, Loader2, AlertTriangle, Camera } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useHabitStore } from '../../store/habitStore'
 import { ChangePasswordModal } from '../auth/AuthModal'
@@ -35,6 +35,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ isOpen, onClose }) => 
   const [isEditingName, setIsEditingName] = useState(false)
   const [draftName, setDraftName] = useState(profile.name)
   const [nameSaved, setNameSaved] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Compute stats
   const totalHabits = habits.filter((h) => h.active).length
@@ -94,6 +95,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ isOpen, onClose }) => 
   const initial = displayName.charAt(0).toUpperCase()
   const joinDate = user?.created_at ? formatJoinDate(user.created_at) : null
 
+  const handlePhotoClick = () => fileInputRef.current?.click()
+
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        updateProfile({ photoDataURL: reader.result })
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
   return (
     <>
       <AnimatePresence>
@@ -135,12 +150,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ isOpen, onClose }) => 
                 {/* Avatar & Identity */}
                 <div className="bg-gradient-to-br from-pink-light/60 to-purple-light/40 dark:from-zinc-800/60 dark:to-zinc-900/40 border border-app-border dark:border-zinc-700 rounded-2xl p-5 flex items-center gap-4">
                   {/* Avatar */}
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-brand to-purple-brand flex items-center justify-center text-white text-2xl font-bold shadow-lg flex-shrink-0 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={handlePhotoClick}
+                    className="relative w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-brand to-purple-brand flex items-center justify-center text-white text-2xl font-bold shadow-lg flex-shrink-0 overflow-hidden"
+                  >
                     {profile.photoDataURL
-                      ? <img src={profile.photoDataURL} alt="" className="w-full h-full object-cover" />
+                      ? <img src={profile.photoDataURL} alt="Profile" className="w-full h-full object-cover" />
                       : initial
                     }
-                  </div>
+                    <div className="absolute bottom-1 right-1 bg-white/90 dark:bg-zinc-900/90 rounded-full p-1 shadow-sm">
+                      <Camera className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-100" />
+                    </div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                    />
+                  </button>
 
                   {/* Name + email */}
                   <div className="min-w-0 flex-1">

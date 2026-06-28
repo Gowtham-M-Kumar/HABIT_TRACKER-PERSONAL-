@@ -28,21 +28,18 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="text-[10px] text-ink3 dark:text-zinc-500 px-3 py-2">Checking session…</div>
-    )
-  }
-
   if (!isAuthenticated || !user) {
     return (
       <button
         type="button"
         onClick={startGoogleLogin}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-app-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-semibold text-ink dark:text-zinc-200 hover:border-pink-brand/40 hover:bg-pink-light/30 dark:hover:bg-zinc-700/50 transition-all cursor-pointer shadow-sm"
+        disabled={isLoading}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl border border-app-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-semibold text-ink dark:text-zinc-200 hover:border-pink-brand/40 hover:bg-pink-light/30 dark:hover:bg-zinc-700/50 transition-all shadow-sm ${
+          isLoading ? 'opacity-70 cursor-wait' : 'cursor-pointer'
+        }`}
       >
         <GoogleIcon className="w-4 h-4" />
-        <span className="hidden sm:inline">Continue with Google</span>
+        <span className="hidden sm:inline">{isLoading ? 'Checking session…' : 'Continue with Google'}</span>
         <span className="sm:hidden">Google</span>
       </button>
     )

@@ -24,7 +24,7 @@ export const AreaChart: React.FC = () => {
   const isEmpty = habits.filter(h => h.active).length === 0
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl p-4 card-shadow min-h-[200px] md:min-h-[160px] md:h-full flex flex-col justify-between hover:border-blue-brand/30 transition-colors duration-300">
+    <div className="bg-white dark:bg-zinc-900 border border-app-border/80 dark:border-zinc-800 rounded-2xl md:rounded-xl p-4 card-shadow h-[220px] md:min-h-[160px] md:h-full flex flex-col justify-between hover:border-blue-brand/30 transition-colors duration-300">
       <div className="flex justify-between items-start gap-2 mb-2 md:mb-1">
         <div>
           <h2 className="text-[13px] md:text-[11px] font-bold tracking-tight md:tracking-wider md:uppercase text-ink dark:text-zinc-100 md:text-ink3 md:dark:text-zinc-400">

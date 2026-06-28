@@ -1,0 +1,544 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif}
+:root{
+  --cream:#FDFCF8;--ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#9090b0;
+  --pink:#F4A0B8;--pink-light:#FDF0F4;--pink-dark:#C4607A;
+  --blue:#A8C5E8;--blue-light:#EFF5FC;--blue-dark:#4A7FAB;
+  --yellow:#F5D87A;--yellow-light:#FFFBEE;--yellow-dark:#B8942A;
+  --green:#8ED4A8;--green-light:#F0FAF4;--green-dark:#2E7D52;
+  --purple:#C0A8E8;--purple-light:#F5F0FD;--purple-dark:#6B4FA8;
+  --coral:#F4A88A;--coral-light:#FEF2EE;--coral-dark:#C05830;
+  --teal:#8ED4CE;--teal-light:#EEF9F8;--teal-dark:#2E7D78;
+  --border:#E8E4F0;--radius:12px;--r-sm:8px;--r-pill:100px;
+}
+.wrap{padding:2rem 1.5rem;background:var(--cream);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 2rem}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--pink-light);color:var(--pink-dark);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;border-radius:var(--r-pill);border:1px solid var(--pink);margin-bottom:1.2rem}
+.hero h1{font-size:2rem;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--ink2);font-size:.95rem;max-width:500px;margin:0 auto}
+.section{margin:2rem 0}
+.section-label{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.section-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.section-title{font-size:.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.divider{height:1px;background:var(--border);margin:2rem 0}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-bottom:.75rem}
+.card-title{font-size:.85rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+.card-body{font-size:.82rem;color:var(--ink2);line-height:1.6}
+.tag{display:inline-block;font-size:.7rem;font-weight:600;padding:2px 9px;border-radius:var(--r-pill);margin-right:4px;margin-bottom:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+.big-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:.75rem}
+.big-card-header{padding:.85rem 1.1rem;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.big-card-body{padding:.85rem 1.1rem;border-top:1px solid var(--border)}
+.feature-row{display:flex;align-items:flex-start;gap:10px;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.feature-row:last-child{border-bottom:none}
+.feature-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.feature-name{font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:2px}
+.feature-desc{font-size:.78rem;color:var(--ink2);line-height:1.5}
+.screen-mock{background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:.75rem}
+.mock-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.mock-title{font-size:.75rem;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.06em}
+.mock-badge{font-size:.65rem;font-weight:600;padding:2px 8px;border-radius:var(--r-pill)}
+.zone{border-radius:8px;padding:.6rem .8rem;margin-bottom:.5rem}
+.zone-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
+.zone-desc{font-size:.72rem;line-height:1.5}
+.timeline{position:relative;padding-left:1.5rem}
+.timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:1rem}
+.tl-dot{position:absolute;left:-1.5rem;top:3px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px var(--border)}
+.tl-title{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+.tl-body{font-size:.77rem;color:var(--ink2);line-height:1.5}
+.tech-pill{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--border);border-radius:var(--r-pill);font-size:.72rem;font-weight:600;color:var(--ink);padding:4px 10px;margin:3px}
+.anim-chip{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);margin:3px}
+.color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.palette-row{display:flex;align-items:center;gap:8px;padding:.4rem 0;border-bottom:1px solid var(--border)}
+.palette-row:last-child{border-bottom:none}
+.palette-swatch{width:32px;height:32px;border-radius:6px}
+.palette-info{flex:1}
+.palette-name{font-size:.78rem;font-weight:600;color:var(--ink)}
+.palette-use{font-size:.72rem;color:var(--ink2)}
+.stat-row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:.78rem;color:var(--ink2)}
+.stat-val{font-size:.78rem;font-weight:700;color:var(--ink)}
+.layout-block{background:#fff;border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.5rem}
+.layout-name{font-size:.75rem;font-weight:700;color:var(--ink);margin-bottom:.3rem}
+.layout-grid{display:grid;gap:4px;margin-top:.4rem}
+.layout-cell{border-radius:4px;padding:.3rem .4rem;font-size:.62rem;font-weight:600;text-align:center;min-height:28px;display:flex;align-items:center;justify-content:center}
+.deploy-card{border-radius:var(--radius);padding:1rem;margin-bottom:.5rem;border:1px solid}
+.phase-badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:var(--r-pill)}
+</style>
+
+<div class="wrap">
+
+<div class="hero">
+  <div class="hero-badge"><span>Pre-production</span><span>·</span><span>Complete plan</span></div>
+  <h1>Habit Tracker App<br>— the complete blueprint</h1>
+  <p>Everything from vision to deployment. Based on your reference video, rebuilt better.</p>
+</div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--pink-light);color:var(--pink-dark)">1</div>
+    <div class="section-title">Product vision</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">What this app is</div>
+      <div class="card-body">A personal habit dashboard that makes consistency visual and satisfying. One beautiful screen. No friction. Check off habits, watch your data grow in real time.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Who it's for</div>
+      <div class="card-body">Students, professionals, anyone building daily routines — people who want a calm, beautiful tool they'll actually open every day, not a cluttered app they abandon.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">The single design promise</div>
+    <div class="card-body">Every number and chart on screen updates the moment you tap a checkbox. No save buttons. No loading. The dashboard is always alive — like watching your life score in real time.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--blue-light);color:var(--blue-dark)">2</div>
+    <div class="section-title">Screen map — all views</div>
+  </div>
+
+  <div class="big-card">
+    <div class="big-card-header" style="background:var(--pink-light);color:var(--pink-dark)">
+      <span>★</span> Main dashboard <span class="mock-badge" style="background:var(--pink);color:#fff;margin-left:auto">Primary screen</span>
+    </div>
+    <div class="big-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div class="layout-cell" style="background:var(--blue-light);color:var(--blue-dark);grid-column:1;grid-row:1">Month title + year selector</div>
+        <div class="layout-cell" style="background:var(--blue-light);color:var(--blue-dark);grid-column:2;grid-row:1">Area chart — 31-day trend</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+        <div class="layout-cell" style="background:var(--pink-light);color:var(--pink-dark)">Profile photo + affirmation</div>
+        <div class="layout-cell" style="background:var(--yellow-light);color:var(--yellow-dark)">Week 1–5 bar charts + % rings</div>
+        <div class="layout-cell" style="background:var(--green-light);color:var(--green-dark)">Daily progress % + habits count rings</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div class="layout-cell" style="background:var(--purple-light);color:var(--purple-dark);min-height:40px">Daily habit grid — checkboxes × 31 days</div>
+        <div class="layout-cell" style="background:var(--coral-light);color:var(--coral-dark);min-height:40px">Top 10 habits leaderboard + daily progress table</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--ink2);margin-top:8px">All 6 zones visible simultaneously on desktop. Mobile collapses to tab navigation between zones.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="big-card">
+      <div class="big-card-header" style="background:var(--yellow-light);color:var(--yellow-dark)">Settings panel</div>
+      <div class="big-card-body">
+        <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">Habit manager</div><div class="feature-desc">Add, rename, reorder, delete habits. Set daily goal targets per habit.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">Profile setup</div><div class="feature-desc">Name, photo upload, personal affirmation text.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">Theme picker</div><div class="feature-desc">Light / dark mode + accent color palette.</div></div></div>
+      </div>
+    </div>
+    <div class="big-card">
+      <div class="big-card-header" style="background:var(--teal-light);color:var(--teal-dark)">Month archive view</div>
+      <div class="big-card-body">
+        <div class="feature-row"><div class="feature-dot" style="background:var(--teal)"></div><div><div class="feature-name">Month switcher</div><div class="feature-desc">Dropdown selector — jump to any past or future month instantly.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--teal)"></div><div><div class="feature-name">Read-only past months</div><div class="feature-desc">Historical data locked — view only. Editing only allowed in current month.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--teal)"></div><div><div class="feature-name">Year overview</div><div class="feature-desc">12-month grid showing monthly score at a glance.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--yellow-light);color:var(--yellow-dark)">3</div>
+    <div class="section-title">Every feature — complete list</div>
+  </div>
+
+  <div class="big-card">
+    <div class="big-card-header" style="background:var(--pink-light);color:var(--pink-dark)">Core tracking</div>
+    <div class="big-card-body">
+      <div class="feature-row"><div class="feature-dot" style="background:var(--pink)"></div><div><div class="feature-name">One-tap checkbox</div><div class="feature-desc">Tap any day cell — it toggles checked/unchecked with a smooth animation. No save needed.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--pink)"></div><div><div class="feature-name">31-day habit grid</div><div class="feature-desc">Full month visible at once. Rows = habits, columns = days. Color-coded per habit.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--pink)"></div><div><div class="feature-name">Up to 30 habits</div><div class="feature-desc">Add any habit with a name and optional target goal (e.g. "30 min", "8 glasses").</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--pink)"></div><div><div class="feature-name">Auto-persist</div><div class="feature-desc">All data saves to localStorage instantly. Works offline on Mac and Android.</div></div></div>
+    </div>
+  </div>
+
+  <div class="big-card">
+    <div class="big-card-header" style="background:var(--blue-light);color:var(--blue-dark)">Live dashboard — auto-updating stats</div>
+    <div class="big-card-body">
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">Daily progress ring</div><div class="feature-desc">Animated circular ring showing today's % of habits completed. Updates on every tap.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">Habits count ring</div><div class="feature-desc">Second ring showing X / total habits completed today (e.g. 277 / 429 cumulative).</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">31-day area chart</div><div class="feature-desc">Mountain-style area chart in the header showing daily completion % across the entire month.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">Weekly bar charts</div><div class="feature-desc">5 bar charts (Week 1–5), each with individual daily bars. Different color per week. % label below each day bar.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">Week score rings</div><div class="feature-desc">5 circular rings below the bar charts — one per week — showing that week's overall completion %.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">Top 10 habits leaderboard</div><div class="feature-desc">Right panel showing the 10 best-performing habits ranked by completion %, auto-sorted.</div></div></div>
+    </div>
+  </div>
+
+  <div class="big-card">
+    <div class="big-card-header" style="background:var(--green-light);color:var(--green-dark)">Daily progress table</div>
+    <div class="big-card-body">
+      <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div><div class="feature-name">Goal column</div><div class="feature-desc">Shows target number of days per month for each habit (e.g. 30, 25, 31).</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div><div class="feature-name">Percentage bar</div><div class="feature-desc">Animated horizontal progress bar per habit — fills as the month progresses.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div><div class="feature-name">Count column</div><div class="feature-desc">Shows X / goal completed (e.g. "19 / 30"). Live updating.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div><div class="feature-name">Longest streak</div><div class="feature-desc">Streak counter per habit — number of consecutive days without a break.</div></div></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="big-card">
+      <div class="big-card-header" style="background:var(--purple-light);color:var(--purple-dark)">Month navigation</div>
+      <div class="big-card-body">
+        <div class="feature-row"><div class="feature-dot" style="background:var(--purple)"></div><div><div class="feature-name">Month dropdown</div><div class="feature-desc">Jan–Dec selector. Instantly switches the entire dashboard to that month's data.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--purple)"></div><div><div class="feature-name">Year selector</div><div class="feature-desc">Switch between years. Data stored separately per year.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--purple)"></div><div><div class="feature-name">Month title animation</div><div class="feature-desc">Large serif month name in the top-left updates with a smooth crossfade when month changes.</div></div></div>
+      </div>
+    </div>
+    <div class="big-card">
+      <div class="big-card-header" style="background:var(--coral-light);color:var(--coral-dark)">Profile zone</div>
+      <div class="big-card-body">
+        <div class="feature-row"><div class="feature-dot" style="background:var(--coral)"></div><div><div class="feature-name">Photo card</div><div class="feature-desc">User photo in a soft rounded card. Tap to change photo.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--coral)"></div><div><div class="feature-name">Affirmation text</div><div class="feature-desc">"I am…" personal affirmation below the photo. Editable in settings.</div></div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--coral)"></div><div><div class="feature-name">Motivational footer</div><div class="feature-desc">Auto quote below leaderboard: "Over 100% on X habits — keep going!" updates based on score.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--purple-light);color:var(--purple-dark)">4</div>
+    <div class="section-title">Animations and live interactions</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Every interaction that animates</div>
+    <div style="margin-top:.6rem">
+      <div class="feature-row"><div class="feature-dot" style="background:var(--pink)"></div><div><div class="feature-name">Checkbox tap</div><div class="feature-desc">Cell pops with a spring scale(1.2) → scale(1) bounce. Color fills with habit's unique color. All rings/charts update with a 300ms ease transition simultaneously.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--blue)"></div><div><div class="feature-name">Progress rings</div><div class="feature-desc">SVG stroke-dashoffset animation — ring "draws" itself smoothly every time a number changes. Daily ring, habits ring, and all 5 week rings are live.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">Bar chart bars</div><div class="feature-desc">Each bar animates height from 0 on initial load (stagger 30ms per bar). On data change, bars smoothly grow or shrink.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div><div class="feature-name">Area chart wave</div><div class="feature-desc">The mountain silhouette in the header redraws with a smooth path morph when data changes. Fills a soft lavender blue.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--purple)"></div><div><div class="feature-name">Month switch</div><div class="feature-desc">Entire dashboard fades out (150ms), data swaps, fades back in (150ms). Month title crossfades with the new name.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--coral)"></div><div><div class="feature-name">Progress bars</div><div class="feature-desc">Habit progress bars in the right panel animate width with CSS transition whenever count changes.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--teal)"></div><div><div class="feature-name">Leaderboard re-sort</div><div class="feature-desc">When ranking changes, rows animate to new positions with a smooth translateY transition.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--ink2)"></div><div><div class="feature-name">Number count-up</div><div class="feature-desc">Any time a stat number increases, it counts up from old value to new in 400ms (requestAnimationFrame loop).</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--teal-light);color:var(--teal-dark)">5</div>
+    <div class="section-title">Design system</div>
+  </div>
+
+  <div class="big-card">
+    <div class="big-card-header" style="background:var(--teal-light);color:var(--teal-dark)">Color palette</div>
+    <div class="big-card-body">
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#FDFCF8;border:1px solid #E8E4F0"></div>
+        <div class="palette-info"><div class="palette-name">Cream — #FDFCF8</div><div class="palette-use">Page background. Warm not cold.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#E8EFFC"></div>
+        <div class="palette-info"><div class="palette-name">Lavender blue — #E8EFFC</div><div class="palette-use">Area chart fill, light backgrounds, headers.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#F4A0B8"></div>
+        <div class="palette-info"><div class="palette-name">Blush pink — #F4A0B8</div><div class="palette-use">Week 2 bars, daily progress ring, accent.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#A8D8EA"></div>
+        <div class="palette-info"><div class="palette-name">Sky blue — #A8D8EA</div><div class="palette-use">Week 1 bars, teal accents.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#8ED4B4"></div>
+        <div class="palette-info"><div class="palette-name">Mint green — #8ED4B4</div><div class="palette-use">Week 3 bars, habits ring, progress bars.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#F5D87A"></div>
+        <div class="palette-info"><div class="palette-name">Honey yellow — #F5D87A</div><div class="palette-use">Week 4 bars, streak highlights.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#C0A8E8"></div>
+        <div class="palette-info"><div class="palette-name">Soft purple — #C0A8E8</div><div class="palette-use">Week 5 bars, leaderboard headers.</div></div>
+      </div>
+      <div class="palette-row">
+        <div class="palette-swatch" style="background:#1a1a2e"></div>
+        <div class="palette-info"><div class="palette-name">Deep navy — #1a1a2e</div><div class="palette-use">All primary text. Month name title.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Typography</div>
+      <div class="card-body">
+        <div class="palette-row">
+          <div class="palette-info"><div class="palette-name" style="font-family:Georgia,serif;font-size:1.1rem">Display serif</div><div class="palette-use">Month name title. Playfair Display or Georgia. Large, expressive.</div></div>
+        </div>
+        <div class="palette-row">
+          <div class="palette-info"><div class="palette-name">UI sans-serif</div><div class="palette-use">Inter or system-ui. All labels, numbers, body. Clean and neutral.</div></div>
+        </div>
+        <div class="palette-row">
+          <div class="palette-info"><div class="palette-name" style="font-family:monospace">Mono</div><div class="palette-use">Percentage numbers. JetBrains Mono. Tabular figures line up.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Spacing and shape</div>
+      <div class="card-body">
+        <div class="stat-row"><span class="stat-label">Border radius — cards</span><span class="stat-val">12px</span></div>
+        <div class="stat-row"><span class="stat-label">Border radius — checkboxes</span><span class="stat-val">4px</span></div>
+        <div class="stat-row"><span class="stat-label">Border — all cards</span><span class="stat-val">1px #E8E4F0</span></div>
+        <div class="stat-row"><span class="stat-label">Cell size — grid</span><span class="stat-val">20×20px</span></div>
+        <div class="stat-row"><span class="stat-label">Gap — grid cells</span><span class="stat-val">3px</span></div>
+        <div class="stat-row"><span class="stat-label">Ring stroke width</span><span class="stat-val">8px</span></div>
+        <div class="stat-row"><span class="stat-label">Bar chart bar width</span><span class="stat-val">10px</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--coral-light);color:var(--coral-dark)">6</div>
+    <div class="section-title">Responsive layout — desktop and mobile</div>
+  </div>
+
+  <div class="screen-mock">
+    <div class="mock-header">
+      <div class="mock-title">Desktop — 1200px+</div>
+      <div class="mock-badge" style="background:var(--blue-light);color:var(--blue-dark)">All zones visible</div>
+    </div>
+    <div style="display:grid;grid-template-columns:160px 1fr 200px;grid-template-rows:auto auto auto;gap:5px;font-size:.65rem">
+      <div class="layout-cell" style="background:var(--pink-light);color:var(--pink-dark);grid-row:1;grid-column:1">Month + selectors</div>
+      <div class="layout-cell" style="background:var(--blue-light);color:var(--blue-dark);grid-row:1;grid-column:2">Area chart header (full width)</div>
+      <div class="layout-cell" style="background:var(--green-light);color:var(--green-dark);grid-row:1;grid-column:3">Progress rings</div>
+      <div class="layout-cell" style="background:var(--coral-light);color:var(--coral-dark);grid-row:2;grid-column:1">Photo + affirmation</div>
+      <div class="layout-cell" style="background:var(--yellow-light);color:var(--yellow-dark);grid-row:2;grid-column:2">5 weekly bar charts + rings</div>
+      <div class="layout-cell" style="background:var(--purple-light);color:var(--purple-dark);grid-row:2;grid-column:3">Top 10 leaderboard</div>
+      <div class="layout-cell" style="background:var(--teal-light);color:var(--teal-dark);grid-row:3;grid-column:1/3;min-height:50px">Habit grid — rows × 31 day columns</div>
+      <div class="layout-cell" style="background:var(--coral-light);color:var(--coral-dark);grid-row:3;grid-column:3;min-height:50px">Daily progress table</div>
+    </div>
+  </div>
+
+  <div class="screen-mock">
+    <div class="mock-header">
+      <div class="mock-title">Mobile — 390px (Android / iPhone)</div>
+      <div class="mock-badge" style="background:var(--green-light);color:var(--green-dark)">Tab navigation</div>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:8px">
+      <div class="layout-cell" style="background:var(--pink);color:#fff;flex:1;border-radius:6px;font-size:.65rem">Dashboard</div>
+      <div class="layout-cell" style="background:var(--blue-light);color:var(--blue-dark);flex:1;border-radius:6px;font-size:.65rem">Grid</div>
+      <div class="layout-cell" style="background:var(--yellow-light);color:var(--yellow-dark);flex:1;border-radius:6px;font-size:.65rem">Charts</div>
+      <div class="layout-cell" style="background:var(--green-light);color:var(--green-dark);flex:1;border-radius:6px;font-size:.65rem">Progress</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:.65rem">
+      <div class="layout-cell" style="background:var(--pink-light);color:var(--pink-dark)">Month + rings (stacked)</div>
+      <div class="layout-cell" style="background:var(--blue-light);color:var(--blue-dark)">Area chart</div>
+      <div class="layout-cell" style="background:var(--yellow-light);color:var(--yellow-dark);grid-column:1/3;min-height:40px">Habit grid — horizontal scroll for days</div>
+    </div>
+    <div style="font-size:.7rem;color:var(--ink2);margin-top:8px">Bottom tab bar with 4 sections. Grid scrolls horizontally for the 31 day columns. All stats still live-update.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--green-light);color:var(--green-dark)">7</div>
+    <div class="section-title">Tech stack — free, fast, works everywhere</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Frontend</div>
+      <div style="margin-top:.5rem;flex-wrap:wrap;display:flex">
+        <div class="tech-pill">React 18</div>
+        <div class="tech-pill">Vite</div>
+        <div class="tech-pill">Tailwind CSS</div>
+        <div class="tech-pill">Recharts</div>
+        <div class="tech-pill">Framer Motion</div>
+        <div class="tech-pill">date-fns</div>
+      </div>
+      <div class="card-body" style="margin-top:.6rem">React for UI. Recharts for bar/area charts. Framer Motion for all animations. Tailwind for styling.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Data and storage</div>
+      <div style="margin-top:.5rem;flex-wrap:wrap;display:flex">
+        <div class="tech-pill">localStorage</div>
+        <div class="tech-pill">JSON</div>
+        <div class="tech-pill">Zustand</div>
+        <div class="tech-pill">No backend</div>
+      </div>
+      <div class="card-body" style="margin-top:.6rem">Zustand for state. All data in localStorage as JSON. Zero backend — fully offline-capable. Data schema versioned for migrations.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">PWA — installable on Mac and Android</div>
+      <div style="margin-top:.5rem;flex-wrap:wrap;display:flex">
+        <div class="tech-pill">vite-plugin-pwa</div>
+        <div class="tech-pill">Service Worker</div>
+        <div class="tech-pill">Web Manifest</div>
+        <div class="tech-pill">Offline mode</div>
+      </div>
+      <div class="card-body" style="margin-top:.6rem">Add to home screen on Android. Install via browser on Mac. Works fully offline after first load. App icon and splash screen included.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Free deployment</div>
+      <div style="margin-top:.5rem;flex-wrap:wrap;display:flex">
+        <div class="tech-pill">Vercel (free)</div>
+        <div class="tech-pill">or Netlify (free)</div>
+        <div class="tech-pill">GitHub Pages</div>
+        <div class="tech-pill">Custom domain</div>
+      </div>
+      <div class="card-body" style="margin-top:.6rem">Deploy to Vercel free tier in under 2 minutes. Your own URL. Push to GitHub → auto-deploys. Zero cost forever on free tier.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--yellow-light);color:var(--yellow-dark)">8</div>
+    <div class="section-title">Data model — what gets stored</div>
+  </div>
+
+  <div class="big-card">
+    <div class="big-card-header" style="background:var(--yellow-light);color:var(--yellow-dark)">localStorage JSON schema</div>
+    <div class="big-card-body">
+      <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">habits[ ]</div><div class="feature-desc">Array of habit objects: id, name, color, goal (target days/month), icon emoji, createdAt, active: true/false.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">logs{ year: { month: { habitId: { day: boolean } } } }</div><div class="feature-desc">Nested object keyed by year → month → habitId → day number → true/false. Very lightweight. A full year of 20 habits ≈ 15KB.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">profile{ }</div><div class="feature-desc">name, affirmation text, photoDataURL (base64 thumbnail), theme, accentColor.</div></div></div>
+      <div class="feature-row"><div class="feature-dot" style="background:var(--yellow)"></div><div><div class="feature-name">settings{ }</div><div class="feature-desc">darkMode, startDayOfWeek, showWeekends, notifications (future), appVersion for migration.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--blue-light);color:var(--blue-dark)">9</div>
+    <div class="section-title">Component architecture</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Component tree — how the app is built</div>
+    <div class="card-body" style="font-family:monospace;font-size:.75rem;line-height:1.9;margin-top:.4rem">
+      &lt;App&gt;<br>
+      &nbsp;&nbsp;├── &lt;TopBar&gt; — month/year selectors, settings icon<br>
+      &nbsp;&nbsp;├── &lt;DashboardLayout&gt; — CSS grid, all zones<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;HeroPanel&gt;<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;MonthTitle&gt; — animated serif heading<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── &lt;ProfileCard&gt; — photo + affirmation<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;AreaChart&gt; — Recharts, 31-day trend<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;ProgressRings&gt;<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;DailyRing&gt; — SVG animated ring<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── &lt;HabitsRing&gt; — SVG animated ring<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;WeeklySection&gt;<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;WeekBarChart&gt; × 5 — Recharts<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── &lt;WeekRing&gt; × 5 — SVG ring<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;LeaderboardPanel&gt; — top 10, animated sort<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;HabitGrid&gt;<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── &lt;HabitRow&gt; × N — habit name + 31 cells<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── &lt;DayCell&gt; — tap to toggle, animated<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── &lt;ProgressTable&gt;<br>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── &lt;ProgressRow&gt; × N — bar + count + streak<br>
+      &nbsp;&nbsp;└── &lt;SettingsDrawer&gt; — slide-in panel
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--pink-light);color:var(--pink-dark)">10</div>
+    <div class="section-title">Build phases — development roadmap</div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--blue)"></div>
+      <div class="tl-title">Phase 1 — Foundation <span class="phase-badge" style="background:var(--blue-light);color:var(--blue-dark);margin-left:6px">Day 1</span></div>
+      <div class="tl-body">Vite + React + Tailwind setup. PWA config. Zustand store. localStorage data layer. Habit CRUD (add/edit/delete). Basic grid rendering.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--pink)"></div>
+      <div class="tl-title">Phase 2 — Core grid and interactions <span class="phase-badge" style="background:var(--pink-light);color:var(--pink-dark);margin-left:6px">Day 2</span></div>
+      <div class="tl-body">31-day habit grid. Tap-to-toggle checkboxes with animation. Day header row (M T W T F S S). Color-coded per habit. Live stat calculation engine.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--yellow)"></div>
+      <div class="tl-title">Phase 3 — Charts and rings <span class="phase-badge" style="background:var(--yellow-light);color:var(--yellow-dark);margin-left:6px">Day 3</span></div>
+      <div class="tl-body">SVG animated progress rings (daily + habits + 5 weekly). Recharts weekly bar charts. Recharts area chart header. All live-update on checkbox tap.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--green)"></div>
+      <div class="tl-title">Phase 4 — Right panels + leaderboard <span class="phase-badge" style="background:var(--green-light);color:var(--green-dark);margin-left:6px">Day 4</span></div>
+      <div class="tl-body">Top 10 leaderboard with animated re-sort. Daily progress table with bars, count, streak. Streak calculation algorithm. Motivational quote logic.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--purple)"></div>
+      <div class="tl-title">Phase 5 — Polish and settings <span class="phase-badge" style="background:var(--purple-light);color:var(--purple-dark);margin-left:6px">Day 5</span></div>
+      <div class="tl-body">Settings drawer. Profile photo upload. Affirmation editor. Month/year navigation with full data persistence. Dark mode toggle. Framer Motion page transitions.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--coral)"></div>
+      <div class="tl-title">Phase 6 — Deploy <span class="phase-badge" style="background:var(--coral-light);color:var(--coral-dark);margin-left:6px">Day 6</span></div>
+      <div class="tl-body">Mobile responsive layout. PWA manifest + service worker. Install prompt on Android. Deploy to Vercel. Test on Mac browser + Android. Done.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-label">
+    <div class="section-num" style="background:var(--teal-light);color:var(--teal-dark)">11</div>
+    <div class="section-title">What makes this better than the reference</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Reference app (your video)</div>
+      <div class="card-body">
+        <div class="feature-row"><div class="feature-dot" style="background:var(--ink3)"></div><div class="feature-desc">Excel / Google Sheets file — not a real app</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--ink3)"></div><div class="feature-desc">No mobile optimization — tiny text on phone</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--ink3)"></div><div class="feature-desc">No animations — static cells</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--ink3)"></div><div class="feature-desc">Paid product (₹149)</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--ink3)"></div><div class="feature-desc">Requires Excel / Google account</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Your new app</div>
+      <div class="card-body">
+        <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div class="feature-desc">Real web app — installable on Mac and Android</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div class="feature-desc">Fully responsive — beautiful on every screen</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div class="feature-desc">Rich animations — everything updates live</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div class="feature-desc">100% free to build and deploy forever</div></div>
+        <div class="feature-row"><div class="feature-dot" style="background:var(--green)"></div><div class="feature-desc">Works offline — no account needed</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:2rem 1rem 1rem">
+  <div style="display:inline-flex;align-items:center;gap:8px;background:var(--pink-light);border:1px solid var(--pink);border-radius:var(--r-pill);padding:8px 20px;font-size:.8rem;font-weight:600;color:var(--pink-dark)">
+    Plan complete — ready to build
+  </div>
+</div>
+
+</div>
